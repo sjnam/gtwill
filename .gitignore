@@ -1,0 +1,14 @@
+# built commands and woven documents
+/bin/
+/build/
+# the link into the module cache, made by make
+/gweb
+# TeX by-products of trying gtwill out
+*.log
+*.toc
+*.mref
+*.smref
+# Go tangled from the webs by `make generate' (the .w and gtwill.ch are the sources)
+/cmd/gtwill/*.go
+/cmd/gtwill-refsort/*.go
+/cmd/gtwill-twinx/*.go

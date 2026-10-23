@@ -1,0 +1,385 @@
+% gtwimac.tex -- plain-TeX macros for documents produced by gtwill.
+% gtwill is GWEB's counterpart of Knuth's CTWILL, and this file is the
+% counterpart of his ctwimac.tex. It loads gwebmac.tex and keeps everything
+% there -- fonts, displayed code, links, index, contents -- except the page
+% builder, which it replaces with one that sets each pair of facing pages as a
+% unit and puts a mini-index at the foot of the right-hand page: the identifiers
+% that the two pages use but do not define, each with its meaning and the
+% section that defines it.
+%
+% Process a woven file twice. The first pass (no \jobname.smref yet) writes the
+% unsorted entries to \jobname.mref; then say
+%     gtwill-refsort < foo.mref > foo.smref
+% and the second pass sets the mini-indexes alphabetized. Delete foo.smref
+% whenever the web changes. Say \let\norefs=\relax before \input gtwimac (that
+% is, on the command line) to read and write neither file.
+%
+% e-TeX is required (\detokenize, \ifcsname, \unexpanded); pdftex and luatex
+% have it.
+\input gwebmac
+\catcode`\@=11
+
+% ---- parameters ---------------------------------------------------------------
+% The pages are gwebmac's \pagewidth by \pageheight; the right-hand page of a
+% spread reaches \miniextra lower, to make room for its mini-index (Knuth's
+% \fullpageht is \pageht plus that pica).
+\newdimen\miniextra   \miniextra=1pc   % extra depth of a right-hand page
+\newdimen\minisep     \minisep=11pt    % space above the rule over a mini-index
+\newdimen\minicolsep  \minicolsep=1pc  % space between its three columns
+\newdimen\minibase    \minibase=9pt    % its baselineskip
+\newdimen\minitop     \minitop=7pt     % its topskip
+\newdimen\minidepth   \minidepth=3pt   % room below its last line
+% Where a left-hand page ends is decided by \vsplit, which weighs the badness of
+% the page against the penalty of the break. A page of code has no stretch, and
+% without some its every break would be equally bad, so the penalties between
+% sections and inside code would count for nothing; \leftstretch lends it some.
+\newskip\leftstretch  \leftstretch=0pt plus 4\baselineskip
+
+% ---- the files of mini-index entries ------------------------------------------
+\newif\ifsorted
+\newread\sreffile
+\newwrite\reffile
+\newif\ifrefs \refstrue
+% The sorted file is opened again when the first spread needs it: a web may
+% \openin and \closein a stream by number in its limbo, and close ours.
+\ifx\norefs\undefined
+  \openin\sreffile=\jobname.smref
+  \ifeof\sreffile \immediate\openout\reffile=\jobname.mref \sortedfalse
+    \message{This is the first pass!}
+  \else \closein\sreffile \sortedtrue \message{This is the second pass!}\fi
+\else \refsfalse \sortedfalse
+\fi
+\newif\ifmini@open
+
+% ---- fonts for the mini-indexes ------------------------------------------------
+% \eightpoint follows cwebmac's ninepoint/eightpoint pattern; a localization
+% (kotexgweb.tex) that defines its own \eightpoint replaces this one.
+\font\sixrm=cmr6 \font\eighti=cmmi8 \font\sixi=cmmi6
+\skewchar\eighti='177 \skewchar\sixi='177
+\font\eightsy=cmsy8 \font\sixsy=cmsy6
+\skewchar\eightsy='60 \skewchar\sixsy='60
+\font\eightbf=cmbx8 \font\sixbf=cmbx6
+\font\eighttt=cmtt8 \hyphenchar\eighttt=-1
+\font\eightsl=cmsl8 \font\eightit=cmti8
+\font\eighttex=cmtex8 \fontdimen7\eighttex=0pt
+\def\eightpoint{\def\rm{\fam0\eightrm}%
+  \textfont0=\eightrm \scriptfont0=\sixrm \scriptscriptfont0=\fiverm
+  \textfont1=\eighti \scriptfont1=\sixi \scriptscriptfont1=\fivei
+  \textfont2=\eightsy \scriptfont2=\sixsy \scriptscriptfont2=\fivesy
+  \textfont3=\tenex \scriptfont3=\tenex \scriptscriptfont3=\tenex
+  \def\it{\fam\itfam\eightit}\textfont\itfam=\eightit
+  \def\sl{\fam\slfam\eightsl}\textfont\slfam=\eightsl
+  \def\bf{\fam\bffam\eightbf}\textfont\bffam=\eightbf
+    \scriptfont\bffam=\sixbf \scriptscriptfont\bffam=\fivebf
+  \def\tt{\fam\ttfam\eighttt}\textfont\ttfam=\eighttt
+  \let\sc=\sixrm
+  \normalbaselineskip=9pt
+  \setbox\strutbox=\hbox{\vrule height7pt depth2pt width\z@}%
+  \normalbaselines\rm}
+
+% ---- the form of an entry ------------------------------------------------------
+% gtwill hands TeX, at the end of each section, the lines
+%     \[sec {name} tex          a meaning defined in section sec of this program
+%     \]{TITLE}sec {name} tex   one defined in section sec of program TITLE
+%     \]"string" {name} tex     one defined in the header or package "string"
+% between \mini and }\FI. The tex part is set after a colon, or after an equals
+% sign if it begins with `=', or after nothing if it is \zip.
+\def\minient#1#2#3{\hangindent=1em \noindent #2\miniform#3, %
+  \S\ifnum#1>\z@\SN{#1}\else#1\fi.\par}
+\def\miniext#1#2#3{\hangindent=1em \noindent #2\miniform#3, \mini@extref#1.\par}
+\def\miniform{\futurelet\next\mini@form}
+\def\mini@form{\ifx\next\zip
+  \else\if=\noexpand\next \let\next\mini@equals
+    \else\let\next\minicolon\fi\fi\next}
+\def\zip{}
+\def\mini@equals={\miniequals}
+\def\miniequals{\,=\,\penalty\z@} % a long name may leave its value to the next line
+\def\minicolon{: }
+\def\mini@extref{\futurelet\next\mini@extrefa}
+\def\mini@extrefa{\if"\next\let\next\mini@string\else\let\next\mini@cite\fi\next}
+\def\mini@string"#1"{{\tentex#1}}
+\def\mini@cite#1#2.{{\sc#1}\,\S#2.}
+\def\uninitialized{???}
+\def\twilllabel{label}
+
+% The lines are delimited by their ends, so the parsers are defined with
+% \obeylines in force, and the end of a line is active from \mini to }\FI.
+{\catcode`\^^M=\active \global\let^^M=\par}%
+
+% ---- proofmode ------------------------------------------------------------------
+% gtproofmac.tex defines \twillproof and inputs this file, which then stops here:
+% each section's entries are listed right after it, and gwebmac's page builder
+% stays in charge. \FI closes the \ifon that gwebmac's \M and \N leave open.
+\ifx\twillproof\undefined\else
+  \def\mini{\par\vskip2pt\bgroup\obeylines\mini@proof}
+  {\obeylines\gdef\mini@proof{\let\[=\mini@pin\let\]=\mini@pout}%
+    \gdef\mini@pin#1 #2 #3
+      {\noindent\kern.5\hsize #2\miniform#3, \S\ifnum#1>0 \SN{#1}\else#1\fi.\par}%
+    \gdef\mini@pout#1 #2 #3
+      {\noindent\kern.5\hsize #2\miniform#3, \mini@extref#1.\par}}
+  \expandafter\let\expandafter\FI\csname fi\endcsname % (a bare \fi would end this \else)
+  \let\twilllast=\relax
+  \catcode`\@=12
+  \expandafter\endinput
+\fi
+
+% ---- the state of the spread being built ------------------------------------
+% Each section is set by itself, as the whole of a page whose \vsize is
+% \maxdimen, and the output routine adds it to \partialpage, the material of the
+% current spread, unless the spread would then overflow; in that case the spread
+% is shipped first, as a left-hand page cut off by \vsplit and a right-hand page
+% holding the rest and the mini-index. The mini-index lists every entry of the
+% spread's sections whose section lies outside the spread, \baseno to \mini@last.
+%
+% An entry is known by its key, the detokenized `sec name' (an external one gets
+% an `x' in front), and kept in four control sequences: \mini@e@<key> typesets it,
+% \mini@r@<key> is the line that \jobname.mref gets, \mini@l@<key> is the number
+% of lines it takes, and \mini@s@<key> the number of the spread it was last
+% listed in. The lists \mini@spread (the spread's entries) and \mini@pend (the
+% section's new ones) hold \mini@do{sec}{key} for each, sec being -1 for an
+% external entry, which is never inside the spread.
+\newbox\partialpage \newbox\newsec \newbox\mini@test \newbox\mini@left
+\newbox\mini@box \newbox\mini@colA \newbox\mini@colB
+\newtoks\newrefs \newtoks\mini@spread \newtoks\mini@pend
+\newtoks\lefthead \newtoks\righthead
+\newcount\baseno \newcount\mini@last \newcount\mini@spreadno
+\newcount\mini@lines \newcount\mini@k
+\newdimen\mini@colwd \newdimen\mini@colht \newdimen\mini@ht
+\newif\ifmini@fits \newif\ifmini@inv \newif\ifbr \newif\ifleft
+\def\secno{0}
+\def\mini@second#1#2{#2}
+
+% \mini ... }\FI: the section's lines go into \newrefs; \FI then digests them
+% and ends the section's page, which brings in the output routine.
+\def\mini{\par\begingroup\obeylines\global\newrefs=\bgroup}
+\def\FI{\endgroup\mini@digest
+  \nobreak\null\nobreak\vskip-\baselineskip\penalty-500\vfil\eject}
+\def\mini@digest{\global\mini@pend={}%
+  \begingroup\let\[=\mini@in \let\]=\mini@out \mini@nl \the\newrefs\endgroup}
+{\catcode`\^^M=\active \gdef\mini@nl{\let^^M=\relax}}%
+{\obeylines\gdef\mini@in#1 #2 #3
+  {\mini@new{#1}{#1 #2}{\minient{#1}{#2}{#3}}{\[#1 {#2} #3}}%
+  \gdef\mini@out#1 #2 #3
+  {\mini@new{-1}{x#1 #2}{\miniext{#1}{#2}{#3}}{\]#1 {#2} #3}}}
+% \mini@new{sec}{key}{typeset}{line}: record an entry of the current section,
+% once per section, measuring it the first time.
+\def\mini@new#1#2#3#4{\edef\mini@key{\detokenize{#2}}%
+  \ifnum\mini@mark{p}=\secno\relax\else
+    \expandafter\xdef\csname mini@p@\mini@key\endcsname{\secno}%
+    \expandafter\gdef\csname mini@e@\mini@key\endcsname{#3}%
+    \expandafter\gdef\csname mini@r@\mini@key\endcsname{#4}%
+    \setbox\mini@test=\vbox{\mini@setup #3\global\mini@lines=\prevgraf}%
+    \expandafter\xdef\csname mini@l@\mini@key\endcsname{\the\mini@lines}%
+    \ifcsname mini@s@\mini@key\endcsname\else
+      \expandafter\xdef\csname mini@s@\mini@key\endcsname{-1}\fi
+    \edef\next{\noexpand\mini@do{#1}{\mini@key}}%
+    \global\mini@pend=\expandafter{\the\expandafter\mini@pend\next}%
+  \fi}
+\def\mini@mark#1{\ifcsname mini@#1@\mini@key\endcsname
+  \csname mini@#1@\mini@key\endcsname\else-1\fi}
+\def\mini@setup{\eightpoint \let\tentex=\eighttex \let\cmntfont=\eightrm
+  \ifx\eighttz\undefined\else\let\tentz=\eighttz\fi
+  \mini@colwd=\pagewidth \advance\mini@colwd-2\minicolsep
+  \divide\mini@colwd by3 \hsize=\mini@colwd
+  \parindent=\z@ \parskip=\z@ \leftskip=\z@ \rightskip=\z@ plus 100pt
+  \parfillskip=\z@ plus 1fil
+  \pretolerance=\@M \hyphenpenalty=\@M \exhyphenpenalty=\@M \hbadness=\@M
+  \baselineskip=\minibase \lineskiplimit=-\maxdimen \topskip=\minitop
+  \clubpenalty=\z@ \widowpenalty=\z@ \interlinepenalty=\z@ \everypar={}}
+
+% ---- counting the lines of a mini-index ----------------------------------------
+% \mini@count{last} sets \mini@lines to the number of lines of the mini-index of
+% a spread running from \baseno to section last, counting the spread's entries
+% and the pending ones that it does not already have.
+\def\mini@count#1{\global\mini@lines=\z@ \def\mini@upto{#1}%
+  \let\mini@do=\mini@countspread \the\mini@spread
+  \let\mini@do=\mini@countpend \the\mini@pend}
+\def\mini@outside#1{\ifnum#1<\baseno \mini@outsidetrue
+  \else\ifnum#1>\mini@upto\relax \mini@outsidetrue\else\mini@outsidefalse\fi\fi}
+\newif\ifmini@outside
+\def\mini@countspread#1#2{\mini@outside{#1}%
+  \ifmini@outside \global\advance\mini@lines\csname mini@l@#2\endcsname\relax\fi}
+\def\mini@countpend#1#2{\mini@outside{#1}%
+  \ifmini@outside \ifnum\csname mini@s@#2\endcsname=\mini@spreadno\else
+    \global\advance\mini@lines\csname mini@l@#2\endcsname\relax\fi\fi}
+% \mini@height sets \mini@colht and \mini@ht, the height of a column and of the
+% whole mini-index with its rule, for \mini@lines lines in three columns.
+\def\mini@height{\ifnum\mini@lines=\z@ \mini@ht=\z@ \mini@colht=\z@ \else
+  \mini@k=\mini@lines \advance\mini@k\tw@ \divide\mini@k\thr@@
+  \mini@colht=\minibase \multiply\mini@colht\mini@k
+  \advance\mini@colht-\minibase \advance\mini@colht\minitop
+  \mini@ht=\mini@colht \advance\mini@ht\minidepth
+  \advance\mini@ht\minisep \advance\mini@ht.4pt \fi}
+
+% ---- the output routine ----------------------------------------------------------
+\def\mini@capacity{\dimen@ii=\pageheight \advance\dimen@ii\miniextra}
+\def\mini@splitleft#1{\vbadness=\@M \splitmaxdepth=\z@ \splittopskip=\topskip
+  \setbox\mini@left=\vsplit#1 to\pageheight}
+\output={\twillout}
+\def\twillout{\global\setbox\newsec=\vbox{\unvbox255}%
+  \ifbr \global\brfalse \flushout \fi
+  \mini@fit \ifmini@fits\else \flushout \fi
+  \mini@add}
+% Does the new section fit on the spread? We try it: put it after the spread's
+% material, cut off the left-hand page as \flushout would, and see whether the
+% rest and the mini-index fit on the right-hand page.
+\def\mini@fit{\global\mini@fitstrue
+  \ifvoid\partialpage\else
+    \mini@count\secno \mini@height
+    \setbox\mini@test=\vbox{\vskip\leftstretch \unvcopy\partialpage
+      \vfilneg\vskip\secskip \unvcopy\newsec}%
+    \mini@splitleft\mini@test
+    \dimen@=\ht\mini@test \advance\dimen@\dp\mini@test \advance\dimen@\mini@ht
+    \mini@capacity \message{\the\dimen@}% the page-break decision amount
+    \ifdim\dimen@>\dimen@ii \global\mini@fitsfalse \fi
+  \fi}
+% The new section joins the spread, and so do its entries.
+\def\mini@add{\ifvoid\partialpage \global\baseno=\secno\relax
+    \global\setbox\partialpage=\box\newsec
+  \else \global\setbox\partialpage=\vbox{\unvbox\partialpage
+      \vfilneg\vskip\secskip \unvbox\newsec}\fi
+  \global\mini@last=\secno\relax
+  \let\mini@do=\mini@merge \the\mini@pend \global\mini@pend={}}
+\def\mini@merge#1#2{\ifnum\csname mini@s@#2\endcsname=\mini@spreadno\else
+  \expandafter\xdef\csname mini@s@#2\endcsname{\the\mini@spreadno}%
+  \global\mini@spread=\expandafter{\the\mini@spread\mini@do{#1}{#2}}\fi}
+
+% ---- shipping a spread -------------------------------------------------------
+\def\flushout{\ifvoid\partialpage\else \begingroup
+    \global\setbox\partialpage=\vbox{\vskip\leftstretch\unvbox\partialpage}%
+    \mini@splitleft\partialpage
+    \mini@ship\leftheadline{\vbox to\pageheight{\unvbox\mini@left\vfill}}%
+    \mini@make
+    \mini@capacity \mini@overflow
+    \mini@ship\rightheadline{\vbox to\dimen@ii{\unvbox\mini@left\vfill
+      \ifvoid\mini@box\else\kern\minisep\hrule\box\mini@box\fi}}%
+  \endgroup
+  \global\lefthead=\righthead
+  \fi
+  \ifvoid\partialpage
+    \global\mini@spread={}\global\advance\mini@spreadno\@ne
+    \global\baseno=\secno\relax
+  \fi}
+% The right-hand page gets what is left of the spread, as a rule; but a section
+% longer than two pages leaves more than a page, and then the right-hand page
+% gets what fits and the rest goes on to the next spread, still with this
+% spread's entries and its first section. (CTWILL lets such a page overflow.)
+\def\mini@overflow{\dimen@=\ht\partialpage \advance\dimen@\dp\partialpage
+  \ifvoid\mini@box\else \advance\dimen@\ht\mini@box \advance\dimen@\minisep
+    \advance\dimen@.4pt \fi
+  \ifdim\dimen@>\dimen@ii
+    \dimen@=\dimen@ii \ifvoid\mini@box\else \advance\dimen@-\ht\mini@box
+      \advance\dimen@-\minisep \advance\dimen@-.4pt \fi
+    \setbox\mini@left=\vsplit\partialpage to\dimen@
+    \message{(section \number\mini@last\space continues on the next spread)}%
+  \else \setbox\mini@left=\box\partialpage \fi}
+% \twillbackground comes first on every page of a spread, as a decoration does
+% in a \plainoutput of the user's; say \let\twillbackground=\FrameBG for a frame
+% drawn behind each page. It must take no room (end with \nointerlineskip).
+\let\twillbackground=\empty
+\def\mini@ship#1#2{\shipout\vbox{\twillbackground\vbox to\z@{\vskip-22.5pt
+      \hbox to\pagewidth{\vbox to8.5pt{}#1}\vss}\nointerlineskip #2}%
+  \global\advance\pageno\@ne}
+\def\leftheadline{\mainfont\folio\qquad{\groupfont\the\lefthead}\hfil
+  {\Gtitlefont\Gtitle}\qquad\S\thinspace\number\baseno}
+\def\rightheadline{\mainfont\S\thinspace\number\mini@last\qquad
+  {\Gtitlefont\Gtitle}\hfil{\groupfont\the\righthead}\qquad\folio}
+
+% \mini@make sets the spread's mini-index in \mini@box, three columns wide, or
+% leaves it void. On the first pass the entries come from \mini@spread, in the
+% order the sections cited them, and go to \jobname.mref as well, headed by the
+% number of the right-hand page; on the second they come from \jobname.smref,
+% sorted, up to its \donewithpage line.
+\def\mini@make{\global\setbox\mini@box=\box\voidb@x
+  \def\mini@upto{\mini@last}%
+  \ifrefs\ifsorted\else\immediate\write\reffile{!\the\pageno}\fi\fi
+  \setbox\mini@test=\vbox{\mini@setup \mini@firstline
+    \ifsorted \mini@readsorted
+    \else \let\mini@do=\mini@print \the\mini@spread \fi}%
+  \ifdim\ht\mini@test>\z@ \mini@columns \fi}
+% The first baseline of a mini-index lies \minitop below its top, as it would
+% on a page whose \topskip is \minitop.
+\def\mini@firstline{\kern\minitop\kern-\minibase\prevdepth=\z@}
+\def\mini@print#1#2{\mini@outside{#1}\ifmini@outside
+  \csname mini@e@#2\endcsname
+  \ifrefs \toks@=\expandafter\expandafter\expandafter{\csname mini@r@#2\endcsname}%
+    \immediate\write\reffile{+ \the\toks@}\fi\fi}
+\def\mini@columns{\dimen@=\ht\mini@test \advance\dimen@-\minitop
+  \mini@lines=\dimen@ \divide\mini@lines\minibase \advance\mini@lines\@ne
+  \mini@height
+  \splitmaxdepth=\maxdimen \splittopskip=\minitop \vbadness=\@M
+  \setbox\mini@colA=\vsplit\mini@test to\mini@colht
+  \setbox\mini@colB=\vsplit\mini@test to\mini@colht
+  \advance\mini@colht\minidepth
+  \global\setbox\mini@box=\hbox to\pagewidth{%
+    \vbox to\mini@colht{\unvbox\mini@colA\vss}\hfil
+    \vbox to\mini@colht{\unvbox\mini@colB\vss}\hfil
+    \vbox to\mini@colht{\unvbox\mini@test\vss}}}
+\def\mini@readsorted{\ifmini@open\else
+    \global\mini@opentrue \immediate\openin\sreffile=\jobname.smref \fi
+  \let\[=\mini@sin \let\]=\mini@sout
+  \let\donewithpage=\mini@done \let\mini@readin=\mini@readln \mini@readin}
+\def\mini@readln{\ifeof\sreffile \let\mini@readin=\relax
+    \message{(\jobname.smref ended early; delete it and start over)}%
+  \else \read\sreffile to\mini@line \expandafter\mini@line\mini@newline \fi
+  \mini@readin}
+{\obeylines\gdef\mini@sin#1 #2 #3
+  {\minient{#1}{#2}{#3}}%
+  \gdef\mini@sout#1 #2 #3
+  {\miniext{#1}{#2}{#3}}%
+  \gdef\mini@done#1
+  {\let\mini@readin=\relax}%
+  \gdef\mini@newline{\unskip
+}}
+
+% ---- section openers ----------------------------------------------------------
+% gwebmac's openers are kept for the end of the document (see \twilllast); \M and
+% \N dispatch to them or to ours, so a web that wraps \M or \N in its limbo
+% wraps both.
+\let\mini@gwebM=\M \let\mini@gwebN=\N
+\newif\ifmini@twill \mini@twilltrue
+\def\M{\ifmini@twill\expandafter\mini@M\else\expandafter\mini@gwebM\fi}
+\def\N{\ifmini@twill\expandafter\mini@N\else\expandafter\mini@gwebN\fi}
+% \M and \N replace gwebmac's: no page-breaking glue (the output routine decides
+% where spreads end) and no \ifon (\FI is not a \fi). A starred section of depth
+% below \secpagedepth starts at the top of a page: of a new spread's left-hand
+% page if the spread's material already fills a page, of the right-hand page if
+% it does not. \NN, which gtwill writes after an @r, inverts that choice.
+\def\mini@M#1{\par\gdef\secno{#1}\emitdate
+  \noindent\dest{#1}{\bf #1\changemark.\quad}\rightskip=\z@\ignorespaces}
+\def\mini@N#1#2#3{\par\gdef\secno{#2}\emitdate
+  {\uppercase{\global\grouptoks={#3}}}%
+  \ifnum#1<\secpagedepth \mini@leftright \fi
+  \noindent\dest{#2}\opentoc
+  \write\toc{\string\Tline{#1}{#2}{\unexpanded{#3}}{\the\pageno}}%
+  {\bf #2\changemark.\quad #3.\quad}\rightskip=\z@\ignorespaces}
+\def\NN{\global\mini@invtrue\N}
+\def\mini@leftright{%
+  \ifvoid\partialpage \lefttrue
+  \else\ifdim\ht\partialpage<\pageheight \leftfalse\else\lefttrue\fi\fi
+  \ifmini@inv \global\mini@invfalse \ifleft\leftfalse\else\lefttrue\fi\fi
+  \ifleft \flushout \global\lefthead=\grouptoks \global\righthead=\grouptoks
+  \else \global\setbox\partialpage=\vbox{%
+      \vbox to\pageheight{\unvbox\partialpage\vfill}\penalty-\@M}%
+    \global\righthead=\grouptoks
+  \fi}
+% \shortpage (from @r) ends the left-hand page before the next section; \forcebr
+% ends the spread before it.
+\def\shortpage{\par\vskip-2\baselineskip\null\vfill\penalty-5000
+  \message{(shortpage)}}
+\def\forcebr{\global\brtrue}
+
+% ---- the back matter -------------------------------------------------------------
+% gtwill writes \twilllast before the last section, the one with the index under
+% it: the last spread is shipped, and gwebmac's ordinary pages take over, so that
+% the index section, the index, the list of section names, and the contents come
+% out as gweave sets them. That section's entries are not wanted, and its \FI
+% closes the \ifon of gwebmac's \N. If a web ends otherwise, \inx does the same.
+\def\twilllast{\par\penalty-\@M \flushout \global\mini@twillfalse
+  \global\output={\plainoutput}\global\vsize=\pageheight \global\hsize=\pagewidth
+  \gdef\FI{\endgroup\fi}}
+\let\mini@inx=\inx
+\def\inx{\ifmini@twill \twilllast \setmark{\secno}\fi \mini@inx}
+
+\hsize=\pagewidth \vsize=\maxdimen
+\catcode`\@=12

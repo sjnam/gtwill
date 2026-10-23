@@ -1,0 +1,33 @@
+% gtwinxmac.tex -- macros for the master index that gtwill-twinx makes.
+% The counterpart of Knuth's twinxmac.tex for CTWILL: the index of a set of
+% programs woven by gtwill, set in two columns with gwebmac's index macros. Each
+% entry cites the programs by their titles, in the order the files were given:
+%     \I{entry}{\twinxref{TITLE}{sections}\twinxref{TITLE2}{sections}...}
+% If a file gtwinx-startup.tex can be found, it is read at the end of this file;
+% put a localization (\input kotexgweb), a \def\title, or a new \twinxtop there.
+\input gwebmac
+\catcode`\@=11
+
+% The section numbers belong to other documents, so they link to nothing; a
+% definition is underlined, as in each program's own index.
+\def\SN#1{#1}
+\def\SND#1{$\underline{\hbox{#1}}$}
+\let\SNs=\SN \let\SNDs=\SND
+
+\def\title{Index}            % the running head and the title over the index
+\def\sechead{}               % there are no sections to show in the running head
+\def\grouphead{}
+\nosecs                      % no list of section names, no contents
+\def\twinxtop{\centerline{\titlefont\title}\vskip 24pt}
+\def\twinxsep{}
+\def\twinxnext{; }           % between the citations of two programs
+\def\twinxref#1#2{\twinxsep{\sc#1}~#2\global\let\twinxsep\twinxnext}
+\def\I#1#2{\global\let\twinxsep\empty\II{#1}{#2}}
+% A long typewriter string in an entry cannot be broken, and the citations of
+% several programs make the lines run differently from any one program's index;
+% a hairline overrun is no reason to complain.
+\hfuzz=1pt
+
+\openin\z@=gtwinx-startup
+\ifeof\z@ \else \closein\z@ \input gtwinx-startup \fi
+\catcode`\@=12
