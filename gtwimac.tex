@@ -25,6 +25,7 @@
 % \fullpageht is \pageht plus that pica).
 \newdimen\miniextra   \miniextra=1pc   % extra depth of a right-hand page
 \newdimen\minisep     \minisep=11pt    % space above the rule over a mini-index
+\newdimen\minirulesep \minirulesep=4pt % space between that rule and the mini-index
 \newdimen\minicolsep  \minicolsep=1pc  % space between its three columns
 \newdimen\minibase    \minibase=9pt    % its baselineskip
 \newdimen\minitop     \minitop=7pt     % its topskip
@@ -209,7 +210,7 @@
   \mini@colht=\minibase \multiply\mini@colht\mini@k
   \advance\mini@colht-\minibase \advance\mini@colht\minitop
   \mini@ht=\mini@colht \advance\mini@ht\minidepth
-  \advance\mini@ht\minisep \advance\mini@ht.4pt \fi}
+  \advance\mini@ht\minisep \advance\mini@ht.4pt \advance\mini@ht\minirulesep \fi}
 
 % ---- the output routine ----------------------------------------------------------
 \def\mini@capacity{\dimen@ii=\pageheight \advance\dimen@ii\miniextra}
@@ -252,7 +253,7 @@
     \mini@make
     \mini@capacity \mini@overflow
     \mini@ship\rightheadline{\vbox to\dimen@ii{\unvbox\mini@left\vfill
-      \ifvoid\mini@box\else\kern\minisep\hrule\box\mini@box\fi}}%
+      \ifvoid\mini@box\else\kern\minisep\hrule\kern\minirulesep\box\mini@box\fi}}%
   \endgroup
   \global\lefthead=\righthead
   \fi
@@ -266,10 +267,10 @@
 % spread's entries and its first section. (CTWILL lets such a page overflow.)
 \def\mini@overflow{\dimen@=\ht\partialpage \advance\dimen@\dp\partialpage
   \ifvoid\mini@box\else \advance\dimen@\ht\mini@box \advance\dimen@\minisep
-    \advance\dimen@.4pt \fi
+    \advance\dimen@.4pt \advance\dimen@\minirulesep \fi
   \ifdim\dimen@>\dimen@ii
     \dimen@=\dimen@ii \ifvoid\mini@box\else \advance\dimen@-\ht\mini@box
-      \advance\dimen@-\minisep \advance\dimen@-.4pt \fi
+      \advance\dimen@-\minisep \advance\dimen@-.4pt \advance\dimen@-\minirulesep \fi
     \setbox\mini@left=\vsplit\partialpage to\dimen@
     \message{(section \number\mini@last\space continues on the next spread)}%
   \else \setbox\mini@left=\box\partialpage \fi}

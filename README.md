@@ -134,7 +134,7 @@ gives them a meaning.
 `gtwimac.tex` keeps `gwebmac.tex`'s page size (`\pagewidth`, `\pageheight`);
 the right-hand page reaches `\miniextra` (1pc) lower. The mini-index is set in
 three columns `\minicolsep` apart, at `\minibase` (9pt) leading, `\minisep` below
-the text; `\leftstretch` decides how readily a left-hand page ends early at a
+the text, and `\minirulesep` (4pt) below the rule that separates it from the text; `\leftstretch` decides how readily a left-hand page ends early at a
 section boundary. `\minicolon`, `\miniequals`, `\twilllabel` (label), and
 `\uninitialized` (???) may be redefined, e.g. by a localization. A
 decoration drawn behind every page goes in `\twillbackground`, which comes first
