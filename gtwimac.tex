@@ -19,6 +19,14 @@
 \input gwebmac
 \catcode`\@=11
 
+% gtwill marks no section as changed, as CTWILL marks none: its change file sets
+% the book up and touches nearly everything. So cweave's change-only listing has
+% no place here, and a \let\maybe=\iffalse in the limbo (the idiom of a change
+% file meant for gweave) would hide every section that gwebmac's \M and \N open,
+% in proofmode and, after \twilllast, in the back matter. \onmaybe is the macro
+% through which \maybe decides; we turn every section on instead.
+\def\onmaybe{\ontrue}
+
 % ---- parameters ---------------------------------------------------------------
 % The pages are gwebmac's \pagewidth by \pageheight; the right-hand page of a
 % spread reaches \miniextra lower, to make room for its mini-index (Knuth's

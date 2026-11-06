@@ -10,18 +10,18 @@ on it but defined elsewhere. Apply it the CWEB way:
 where gweave.w is cmd/gweave/gweave.w of the GWEB release pinned in go.mod.
 
 @x limbo
-\def\title{GWEAVE (Version 0.10.5)}
+\def\title{GWEAVE (Version 0.10.6)}
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GWEAVE} processor}
   \vskip 15pt
-  \centerline{(Version 0.10.5)}
+  \centerline{(Version 0.10.6)}
   \vfill}
 @y
-\def\title{GTWILL (Version 0.10.5)}
+\def\title{GTWILL (Version 0.10.6)}
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GTWILL} processor}
   \vskip 15pt
-  \centerline{(Version 0.10.5)}
+  \centerline{(Version 0.10.6)}
   \vfill}
 @z
 
@@ -203,14 +203,18 @@ If the \TEX/ part is `\.{\\zip}', the mini-index entry will contain neither colo
 nor equals, just a comma. The program name and section number can also be
 replaced by a string. For example,
 $$\.{@@\$Println "fmt" \\zip@@>}$$
-will generate a mini-index entry like `\\{Println}, \.{fmt}.'. The title of the
+will generate a mini-index entry like `\\{Println}, \.{fmt}.'. Such a string is
+set in typewriter type as it stands, but you need not escape the characters
+special to \TEX/ in it: \.{gtwill} escapes them, so that a name from a file
+\.{"gb\_graph.w"} can say so. The title of the
 current program is what its limbo gives to \.{\\def\\title}; failing that, it is
 the base name of the output file.
 
 \.{gtwill} keeps quiet about what it cannot know. An identifier whose current
 meaning is still \.{\\uninitialized} goes into a mini-index---as `???', so that
 you notice it---only if it is an ordinary name of the program: not a predeclared
-type or function like |int| or |len|, not the name of an imported package, and
+type or function like |int| or |len|, not the name of a package, imported or the
+program's own, and
 not a name selected with a dot, like the |Println| of |fmt.Println| or the
 |Len| of |b.Len()|, which belong to some other package. Give such a name a
 meaning with \.{@@\$} and it will be cited like any other.
@@ -483,47 +487,6 @@ if sec.Starred && sec.Number == len(wv.w.Sections) {
 }
 @z
 
-@x the code part is also lexed whole, for the mini-indexes
-	for _, a := range common.ScanCode(code) {
-		@<Render one code atom@>
-	}
-	flushLine()
-	return out.String()
-}
-@y
-	@<Lex the whole code part, for the mini-indexes@>
-	for ai, a := range atoms {
-		base := offs[ai] // where the atom's tokens begin in |whole|
-		@<Render one code atom@>
-	}
-	flushLine()
-	return out.String()
-}
-
-@ A control code splits a code part into atoms, and |renderCode| lexes the
-atoms one by one; but a declaration must be seen whole, across them, if
-\.{gtwill} is to read a meaning off it: in \.{type @@!pointer = halfword} the
-\.{@@!} leaves |type| in one atom and the name in the next. So the mini-index
-machinery is handed the tokens of the whole code part, |whole|, lexed as
-|scanAllCode| lexes them for the detectors, and the atom at index |ai| begins at
-|offs[ai]| in it: its text gives the same tokens that |renderCode| sees, and a
-reference, a \.{@@t} box, or verbatim material is a stand-in operand.
-@<Lex the whole code part, for the mini-indexes@>=
-atoms := common.ScanCode(code)
-var whole []token
-offs := make([]int, len(atoms))
-var wst lexState
-for i, a := range atoms {
-	offs[i] = len(whole)
-	switch a.Kind {
-	case common.AText:
-		whole = append(whole, lexGo(a.Text, &wst)...)
-	case common.ARef, common.ATeX, common.AVerbatim:
-		whole = append(whole, token{kind: tkString}) // a stand-in operand
-	}
-}
-@z
-
 @x recording a code token
 		if k, ok := wv.lookupFormat(t.text, qual); ok {
 			wv.xr.noteHead(t.text, k) // so a qualified type's head is bold too
@@ -670,7 +633,8 @@ var predeclaredFuncs = map[string]bool{
 }
 
 @ When the |Weaver| is made, each section gives up its operations, the program's
-title is looked for, and the imported package names are noted.
+title is looked for, and the names of the program's own package and of the imported
+packages are noted.
 @<Prepare the mini-index state@>=
 wv.tw = &twill{ops: map[int][]twillOp{}, pkgs: map[string]bool{}}
 for _, s := range w.Sections {
@@ -680,7 +644,7 @@ for _, s := range w.Sections {
 	wv.tw.ops[s.Number] = append(ops, more...)
 }
 @<Find the program's title in the limbo@>
-@<Note the package names that the imports bring in@>
+@<Note the package names that the package clause and the imports bring in@>
 
 @ |extractTwillOps| removes the operations from a section's commentary or code,
 returning what is left and the operations themselves. A doubled \.{@@@@} is an
@@ -742,10 +706,18 @@ for _, ln := range strings.Split(w.Limbo, "\n") {
 
 @ An import brings in the last element of its path, or the name written before
 the path. Each spec of an |import| holds just one string, so every string in
-the declaration is a path.
-@<Note the package names that the imports bring in@>=
+the declaration is a path. The package clause names a package too, the
+program's own, which the commentary may well mention, as in |foo.New|; that name
+is no more an ordinary name of the program than an imported one.
+@<Note the package names that the package clause and the imports bring in@>=
 wv.scanAllCode(func(toks []token) {
 	for i := range toks {
+		if toks[i].kind == tkKeyword && toks[i].text == "package" {
+			if j := nextSignificant(toks, i+1); j >= 0 && toks[j].kind == tkIdent {
+				wv.tw.pkgs[toks[j].text] = true
+			}
+			continue
+		}
 		if toks[i].kind != tkKeyword || toks[i].text != "import" {
 			continue
 		}
@@ -955,7 +927,11 @@ default:
 if end < 0 {
 	return fmt.Errorf("title name didn't end")
 }
-m.prog = tw.title(rest[:end])
+loc := rest[:end]
+if loc[0] == '"' {
+	@<Escape the \TEX/ specials of the doublequoted title |loc|@>
+}
+m.prog = tw.title(loc)
 j := end
 for rest[0] == '{' && j < len(rest) && rest[j] >= '0' && rest[j] <= '9' {
 	m.sec = 10*m.sec + int(rest[j]-'0')
@@ -965,6 +941,20 @@ if j >= len(rest) || (rest[j] != ' ' && rest[j] != '\t') {
 	return fmt.Errorf("location in meaning should be followed by space")
 }
 rest = rest[j+1:]
+
+@ A doublequoted title is set in typewriter type as it stands, so a character
+special to \TEX/ in it---the underscore of a file name like \.{gb\_graph.w}, for
+one---is escaped here, unless a backslash escapes it already. The \.{.aux} file
+then holds the title escaped, and it reads back the same.
+@<Escape the \TEX/ specials of the doublequoted title |loc|@>=
+var b strings.Builder
+for i := 0; i < len(loc); i++ {
+	if strings.IndexByte("_&#%$", loc[i]) >= 0 && (i == 0 || loc[i-1] != '\\') {
+		b.WriteByte('\\')
+	}
+	b.WriteByte(loc[i])
+}
+loc = b.String()
 
 @*1 Weaving a section with mini-index entries.
 When a section begins, its temporary meanings from last time are gone, its
@@ -1273,8 +1263,15 @@ if q := prevSignificant(toks, h); q >= 0 && toks[q].kind == tkKeyword &&
 	@<Set |kind| by the bracket at |e|@>
 }
 
-@ @<Set |kind| by the bracket at |e|@>=
-if e >= 0 {
+@ A name that no bracket encloses may still be a field: the code part may be a
+field list of its own, the definition of a section that a |struct| splices in
+among its fields, which \.{gweave} has found out for its index (|fieldLists|).
+@<Set |kind| by the bracket at |e|@>=
+if e < 0 && wv.tw.sec > 0 {
+	if s := wv.w.Sections[wv.tw.sec-1]; s.Name != "" && wv.fieldLists[wv.w.Resolve(s.Name)] {
+		kind = "field"
+	}
+} else {
 	q := prevSignificant(toks, e)
 	keyword := ""
 	if q >= 0 && toks[q].kind == tkKeyword {
@@ -2035,6 +2032,40 @@ func TestTwillDigest(t *testing.T) {
 		if err := tw.digest(bad); err == nil {
 			t.Errorf("%q should be rejected", bad)
 		}
+	}
+	for in, want := range map[string]string{`"gb_graph.w"`: `"gb\_graph.w"`, `"a\_b"`: `"a\_b"`} {
+		if err := tw.digest("u " + in + ` \zip`); err != nil {
+			t.Fatal(err)
+		}
+		if got := tw.titles[tw.meaningOf("u").perm.prog]; got != want {
+			t.Errorf("title %s became %s, want %s", in, got, want)
+		}
+	}
+}
+
+@ A field gets its type for a meaning when it follows a section reference in the
+body of a |struct|, and when it is declared in a section spliced in among the
+fields.
+@(gweave_test.go@>=
+func TestTwillSplicedFields(t *testing.T) {
+	_, wv := weaveTwill(t, "\\def\\title{FOO}\n@@ a\n@@c\ntype s struct {\n\t@@<Fields@@>\n\tlast bool\n}\n"+
+		"@@ b\n@@<Fields@@>=\nfirst []int64\n")
+	aux := strings.Join(wv.tw.aux, "\n")
+	for _, want := range []string{`last {FOO}1 \PB{\KW{bool}}`,
+		`first {FOO}2 \PB{\mathord{[}\,\mathord{]}\KW{int64}}`} {
+		if !strings.Contains(aux, want) {
+			t.Errorf("aux lacks %q:\n%s", want, aux)
+		}
+	}
+}
+
+@ The program's own package, like an imported one, is cited only with a meaning,
+though the commentary names it.
+@(gweave_test.go@>=
+func TestTwillOwnPackage(t *testing.T) {
+	out, _ := weaveTwill(t, "@@ a\n@@c\npackage foo\n\nfunc New() {}\n@@ b Call |foo.New|.\n")
+	if strings.Contains(out, `{\ID{foo}} \uninitialized`) {
+		t.Errorf("the package foo should not be cited:\n%s", out)
 	}
 }
 

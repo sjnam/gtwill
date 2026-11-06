@@ -73,7 +73,9 @@ always involved a change file of hints, and so does it here:
 | `@r`            | `\shortpage` before the next section (`@r@*` inverts left and right)   |
 
 A TeX part beginning with `=` is set after an equals sign instead of a colon, and
-`\zip` makes an entry with neither. `@%` means CTWILL's toggle here, not GWEB's
+`\zip` makes an entry with neither. A doublequoted location is set in typewriter
+as it stands; `gtwill` escapes the characters special to TeX in it, so
+`"gb_graph.w"` needs no backslash. `@%` means CTWILL's toggle here, not GWEB's
 comment. `gtangle` ignores all of these.
 
 Meanings come from `system.bux`, then from the web's own declarations, then from
@@ -108,10 +110,13 @@ means `=` and its definition, with a `struct` or `interface` body elided; a
 `label`. Parameter lists and long array lengths are elided as CTWILL elides them.
 Where Go leaves a type to the compiler (`n := ...`), `gtwill` guesses from the
 form of the value — a literal, a composite literal, `make`, `new`, a conversion,
-a function literal — and otherwise says `var`.
+a function literal — and otherwise says `var`. A field is recognized as one
+after a section reference in a `struct`'s body, and in a section that a `struct`
+splices in among its fields (GWEB's `gweave` finds those for its index too).
 
 An identifier nobody defined is cited as `???` so that you notice it, but only if
-it is an ordinary name of the program: predeclared names, imported packages, and
+it is an ordinary name of the program: predeclared names, packages (imported or
+the program's own), and
 names selected with a dot (`fmt.Println`, `b.Len()`) are cited only when a `@$`
 gives them a meaning.
 
@@ -127,7 +132,9 @@ gives them a meaning.
 * The index section, the index, the list of section names, and the contents are
   set as `gweave` sets them (`gtwill` writes `\twilllast` before the last starred
   section); CTWILL sets no index and leaves that to `twinx`.
-* Sections touched by the change file are not starred, as in CTWILL.
+* Sections touched by the change file are not starred, as in CTWILL; and since
+  none is marked as changed, `gtwimac.tex` turns every section on, so a
+  `\let\maybe=\iffalse` meant for `gweave`'s change-only listing hides nothing.
 
 ## Tuning
 
