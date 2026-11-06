@@ -10,18 +10,18 @@ on it but defined elsewhere. Apply it the CWEB way:
 where gweave.w is cmd/gweave/gweave.w of the GWEB release pinned in go.mod.
 
 @x limbo
-\def\title{GWEAVE (Version 0.10.6)}
+\def\title{GWEAVE (Version 0.10.7)}
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GWEAVE} processor}
   \vskip 15pt
-  \centerline{(Version 0.10.6)}
+  \centerline{(Version 0.10.7)}
   \vfill}
 @y
-\def\title{GTWILL (Version 0.10.6)}
+\def\title{GTWILL (Version 0.10.7)}
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GTWILL} processor}
   \vskip 15pt
-  \centerline{(Version 0.10.6)}
+  \centerline{(Version 0.10.7)}
   \vfill}
 @z
 
@@ -710,7 +710,7 @@ the declaration is a path. The package clause names a package too, the
 program's own, which the commentary may well mention, as in |foo.New|; that name
 is no more an ordinary name of the program than an imported one.
 @<Note the package names that the package clause and the imports bring in@>=
-wv.scanAllCode(func(toks []token) {
+wv.scanAllCode(func(toks []token, _ string) {
 	for i := range toks {
 		if toks[i].kind == tkKeyword && toks[i].text == "package" {
 			if j := nextSignificant(toks, i+1); j >= 0 && toks[j].kind == tkIdent {
@@ -1266,10 +1266,20 @@ if q := prevSignificant(toks, h); q >= 0 && toks[q].kind == tkKeyword &&
 @ A name that no bracket encloses may still be a field: the code part may be a
 field list of its own, the definition of a section that a |struct| splices in
 among its fields, which \.{gweave} has found out for its index (|fieldLists|).
+Or the code part may be the body of a declaration group, a section that a
+|var|, |const|, or |type| group splices in among its specs (|declLists|), and
+then the name is declared by the group's keyword. Without this a table of
+constants written section by section, |fcmp|, |funeq|, \dots, one name to a
+line, would have no meanings at all, for the names would seem to be mere uses.
 @<Set |kind| by the bracket at |e|@>=
 if e < 0 && wv.tw.sec > 0 {
-	if s := wv.w.Sections[wv.tw.sec-1]; s.Name != "" && wv.fieldLists[wv.w.Resolve(s.Name)] {
-		kind = "field"
+	if s := wv.w.Sections[wv.tw.sec-1]; s.Name != "" {
+		name := wv.w.Resolve(s.Name)
+		if wv.fieldLists[name] {
+			kind = "field"
+		} else if kw := wv.declLists[name]; kw != "" {
+			kind = kw
+		}
 	}
 } else {
 	q := prevSignificant(toks, e)
@@ -2053,6 +2063,24 @@ func TestTwillSplicedFields(t *testing.T) {
 	aux := strings.Join(wv.tw.aux, "\n")
 	for _, want := range []string{`last {FOO}1 \PB{\KW{bool}}`,
 		`first {FOO}2 \PB{\mathord{[}\,\mathord{]}\KW{int64}}`} {
+		if !strings.Contains(aux, want) {
+			t.Errorf("aux lacks %q:\n%s", want, aux)
+		}
+	}
+}
+
+@ So does a name declared in a section spliced into a declaration group: a
+constant gets \&{const} or its value, as in a group of its own, and a variable
+gets its type.
+@(gweave_test.go@>=
+func TestTwillSplicedGroups(t *testing.T) {
+	_, wv := weaveTwill(t, "\\def\\title{FOO}\n@@ a\n@@c\nconst (\n\t@@<Opcodes@@>\n)\n"+
+		"func f() {\n\tvar (\n\t\t@@<Locals@@>\n\t)\n}\n"+
+		"@@ b\n@@<Opcodes@@>=\nadd = iota\nsub\nlimit = 10\n"+
+		"@@ c\n@@<Locals@@>=\nx, y int\n")
+	aux := strings.Join(wv.tw.aux, "\n")
+	for _, want := range []string{`add {FOO}2 \PB{\KW{const}}`, `sub {FOO}2 \PB{\KW{const}}`,
+		`limit {FOO}2 =\PB{\NU{10}}`, `x {FOO}3 \PB{\KW{int}}`, `y {FOO}3 \PB{\KW{int}}`} {
 		if !strings.Contains(aux, want) {
 			t.Errorf("aux lacks %q:\n%s", want, aux)
 		}

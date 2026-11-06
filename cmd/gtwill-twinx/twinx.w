@@ -3,7 +3,7 @@
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GTWILL-TWINX} program}
   \vskip 15pt
-  \centerline{(GTWILL Version 0.10.6)}
+  \centerline{(GTWILL Version 0.10.7)}
   \vfill}
 \def\botofcontents{\vfill\centerline{\smallfont
   Copyright \copyright\ 2026 Soojin Nam. MIT License.}}
