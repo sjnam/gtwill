@@ -1,0 +1,447 @@
+% gtwillman.tex -- the GTWILL manual.  Process with luatex, which can find
+% gwebmac.tex and hangulfont.tex, for example
+%       TEXINPUTS=.:gweb: luatex gtwillman.tex
+% or simply `make manual' from the top of the repository.
+%
+% It is formatted like GWEB's gwebman.tex, which is formatted in the manner of
+% Knuth and Levy's cwebman.tex: it loads the GWEB macro package and adds its own
+% section, list, verbatim, and running-head macros on top. The Korean
+% translation, gtwillman-ko.tex, keeps the same macros; change it with this one.
+% Only GWEB's hangulfont.tex is loaded, not kotexgweb.tex, whose baselines
+% are for Korean text: the code displays pair \tentt with its Hangul
+% typewriter \tentz, for the line of Korean in `Weaving in Korean'.
+
+\input gwebmac
+\input hangulfont
+\pdffalse \dvipdffalse        % a plain manual: no hyperlinks or bookmarks
+\parskip=0pt plus 1pt
+\parindent=18pt
+\abovedisplayskip=.5\abovedisplayskip  \belowdisplayskip=.5\belowdisplayskip
+\abovedisplayshortskip=.5\abovedisplayshortskip
+\belowdisplayshortskip=.5\belowdisplayshortskip
+
+\font\eighttt=cmtt8
+\font\ninett=cmtt9
+\font\twelvett=cmtt12
+\font\authorfont=cmr12
+\font\sectionfont=cmbx12
+\font\eightit=cmti8
+\font\eightbf=cmbx8
+\font\logosl=logosl10 % the METAFONT logo, slanted for a book title
+\def\slMF{{\logosl META}\-{\logosl FONT}}
+
+%---inline code; @ < > = etc. are safe in \tt, so avoid braces inside \cw ---
+\def\cw#1{{\tt #1}}
+\def\bs{\char92 }                              % a literal backslash, in \tt
+\def\lb{\char123 }\def\rb{\char125 }           % literal braces, in \tt
+
+%---a centred chapter heading, in the manner of cwebman's \section ---
+\def\chapter#1{\penalty-500\bigskip
+  \centerline{\sectionfont\def\.##1{{\twelvett##1}}#1}\nobreak\vskip 6pt}
+%---a run-in bold subsection heading ---
+\def\section#1{\medskip\noindent{\bf #1.}\enspace\ignorespaces}
+
+%---a bulleted list item ---
+\def\bull{\smallskip\item{$\bullet$}}
+
+%---a verbatim code display (TeXbook recipe): | is the escape inside it ---
+\def\begincode{\par\medskip\begingroup
+  \def\do##1{\catcode`##1=12 }\dospecials
+  \catcode`\|=0
+  \obeylines \obeyspaces \tentt\tentz \parindent=0pt \leftskip=\parindent\relax}
+\def\endcode{\endgroup\medskip\noindent}
+
+%---a sample mini-index: three columns under a rule, as gtwimac sets one ---
+\def\sampleentry#1{\hbox{#1}}
+\def\samplemini#1#2#3{\par\medskip
+  \hrule\kern4pt
+  \hbox to\hsize{\eightrm \def\it{\eightit}\def\bf{\eightbf}\let\tt=\eighttt
+    \baselineskip=9pt \vtop{#1}\hfil\vtop{#2}\hfil\vtop{#3}}%
+  \medskip\noindent}
+
+%---running heads, in the manner of cwebman ---
+\def\runninghead{{\ninett GTWILL} USER MANUAL (VERSION 0.10.7)}
+\def\lheader{\mainfont\folio\hfil{\sc\runninghead}\hfil}
+\def\rheader{\hfil{\sc\runninghead}\hfil\mainfont\folio}
+
+% =============================================================================
+% Title page (no running head), in the manner of cwebman.
+\headline={\hfil}\footline={\hfil}
+\null\vfill
+\centerline{\titlefont The {\ttitlefont GTWILL} System}
+\vskip 6pt
+\centerline{\sectionfont Mini-indexes for Literate Go Programs}
+\vskip 18pt
+\centerline{(Version 0.10.7)}
+\vskip 24pt
+\centerline{\authorfont modeled on Knuth's {\ttitlefont CTWILL}}
+\vfill
+\noindent
+This is a guide to \.{GTWILL} for readers who already know \.{GWEB}. \.{GTWILL}
+weaves a \cw{.w} file exactly as \cw{gweave} does, but it sets the pages in
+facing pairs and puts a {\it mini-index\/} at the foot of every right-hand page:
+the identifiers that the two pages use but do not define, each with a word about
+what it is and the section that defines it. It is to \.{GWEB} what Knuth's
+\.{CTWILL} is to \.{CWEB}, and \.{CTWILL} descends from \.{TWILL}, the private
+\.{WEB} program with which Knuth produced {\sl \TeX: The Program\/} and {\sl
+\slMF: The Program\/} in 1985. Knuth tells the story in
+``Mini-indexes for literate programs,'' reprinted in {\sl Digital
+Typography\/} (1999), 225--245. A web needs no change to be woven by
+\cw{gtwill}; but good mini-indexes, as Knuth found, take some work, and most of
+this manual is about that work.
+\pageno=0
+\vfil\eject
+
+% Running heads from the second page on.
+\headline={\ifodd\pageno\rheader\else\lheader\fi}
+
+\chapter{\.{GTWILL} at a glance}
+\noindent\.{GTWILL} mirrors \.{CTWILL} tool for tool:
+
+\bull \cw{gtwill} $\approx$ \cw{ctwill}---weaves a web, with mini-index
+information;
+
+\bull \cw{gtwill-refsort} $\approx$ \cw{refsort}---sorts the mini-index entries
+between two \TeX\ passes;
+
+\bull \cw{gtwill-twinx} $\approx$ \cw{twinx}---merges the indexes of several
+programs into one master index;
+
+\bull \cw{gtwimac.tex} $\approx$ \cw{ctwimac.tex}---the page builder for facing
+pages with mini-indexes;
+
+\bull \cw{gtproofmac.tex} $\approx$ \cw{proofmac.tex}---proofmode, in which each
+section is followed by its entries;
+
+\bull \cw{gtwinxmac.tex} $\approx$ \cw{twinxmac.tex}---the master index.
+
+\noindent The whole cycle for one web \cw{foo.w}, with its change file
+\cw{foo.ch}, is
+\begincode
+gtwill foo.w foo.ch                   # -> foo.tex, foo.aux
+luatex foo                            # first pass: -> foo.pdf, foo.mref
+gtwill-refsort < foo.mref > foo.smref
+luatex foo                            # second pass: mini-indexes alphabetized
+|endcode
+and \cw{pdftex} serves as well as \cw{luatex}, unless the web is in Korean.
+
+\chapter{What a mini-index says}
+\noindent Here is the foot of a right-hand page of {\sl \TeX: The Program},
+translated into \GO/ and set by \.{GTWILL}:
+\samplemini
+ {\sampleentry{{\it appendChar\/}: {\bf func}( ), \S53.}
+  \sampleentry{{\it curLength\/}: {\bf func}( ) {\bf int32}, \S52.}
+  \sampleentry{{\it flushChar\/}: {\bf func}( ), \S53.}
+  \sampleentry{{\it hh\/}: {\bf twoHalves}, \S129.}}
+ {\sampleentry{{\it mem\/}: [\,]{\bf memoryWord}, \S132.}
+  \sampleentry{{\it memEnd\/}: {\bf pointer}, \S134.}
+  \sampleentry{{\it memMin\/} = 0, \S13.}
+  \sampleentry{{\bf memoryWord} = {\bf struct}, \S129.}}
+ {\sampleentry{{\it printCurrentString\/}: {\bf func}( ), \S85.}
+  \sampleentry{{\it printLn\/}: {\bf func}( ), \S69.}
+  \sampleentry{{\it printStr\/}: {\bf func}( ), \S72.}
+  \sampleentry{{\it showBox\/}: {\bf func}( ), \S218.}}%
+Each entry is an identifier that the two facing pages use but do not define,
+set the way the index sets it (bold for a type, typewriter for an \cw{@d} name
+or a constant in capitals, italic otherwise); then its {\it meaning}, after a
+colon, or after an equals sign for a constant or a type; then the section that
+defines it. A name defined in another program cites that program's title before
+the section number, {\sc GBGRAPH}\thinspace\S12, and a name from a package or a
+file cites it in typewriter, \cw{fmt}.
+
+\section{Current meanings}
+\cw{gtwill} works the way \.{CTWILL} does. Every identifier has a current
+meaning, consisting of its abstract type and the number of the section in which
+it was most recently defined. If your program says \cw{var s []byte} in
+section~3, the meaning of \cw{s} becomes ``\cw{[]byte}, \S3'' while \cw{gtwill}
+is processing that section. If you refer to \cw{s} in section~10, and \cw{s}
+hasn't been redefined in the meantime, and section~10 doesn't wind up on the
+same spread as section~3, the mini-index of section~10's spread will say
+``{\it s\/}: [\,]{\bf byte}, \S3.'' At the end of each section \cw{gtwill} gives
+\TeX\ the list of identifiers the section uses, with their meanings, and the
+macros of \cw{gtwimac.tex} decide which of them belong in each mini-index, based
+on how the pages break.
+
+\section{Meanings from \GO/ declarations}
+\CEE/ spells a declaration's type for all to see; \GO/ often leaves it to the
+compiler, and \cw{gtwill} is no compiler. \.{CTWILL} reads a definition off the
+partly reduced scraps of \cw{cweave}'s grammar; \cw{gweave} has no grammar, only
+the tokens around a defined name, so \cw{gtwill} reads the declaration directly:
+
+\bull a \cw{var}, a field, or a parameter means its type;
+
+\bull a \cw{type} means $=$ and its definition, with the body of a \cw{struct}
+or \cw{interface} elided;
+
+\bull a \cw{const} means $=$ and its value, when that is a literal or a short
+expression (\cw{memTop - 11}), and its type or just \cw{const} otherwise;
+
+\bull a function means \cw{func( )} and its results, the parameters elided; a
+method means \cw{(*T) func( )} and its results; a label means \cw{label};
+
+\bull a short declaration such as \cw{n := len(s)} states no type, so \cw{gtwill}
+guesses one from the form of the value---a literal, a composite literal, a call
+of \cw{make} or \cw{new}, a conversion, a function literal---and otherwise
+says \cw{var}.
+
+\noindent Parameter lists and long array lengths are elided as \.{CTWILL}
+elides them. A field is recognized as one inside a \cw{struct}'s body, also
+after a section reference there, and in a section that a \cw{struct} splices in
+among its fields.
+
+\section{What is not cited}
+An identifier that nobody has defined is cited as `???', so that you notice it,
+but only if it is an ordinary name of the program. \cw{gtwill} keeps quiet about
+predeclared names (\cw{int}, \cw{len}), the names of packages, imported or the
+program's own, and names selected with a dot, like the \cw{Println} of
+\cw{fmt.Println} or the \cw{Len} of \cw{b.Len()}, which belong to some other
+package. Give such a name a meaning with \cw{@\$} (see below) and it is cited
+like any other.
+
+\chapter{Running the programs}
+\begincode
+gtwill [-P] [-o dir] file[.w] [change[.ch]]
+gtwill-refsort < file.mref > file.smref
+gtwill-twinx file.tex ... > index.tex
+|endcode
+\cw{gtwill} takes the arguments and flags of \cw{gweave}---the \cw{.w} and
+\cw{.ch} may be omitted, \cw{-o} chooses the output directory, \cw{-version}
+prints the version---and one more, \cw{-P}, for proofmode (see below). Besides
+\cw{foo.tex} it writes \cw{foo.aux}, which records the web's own definitions
+in a form that other webs can read. The woven file begins with \cw{\bs input
+gtwimac}, which loads \cw{gwebmac}; a stray \cw{\bs input gwebmac} in the limbo is
+dropped.
+
+\section{One run, two passes}
+\.{CTWILL} had to be run twice, ``once to prime the pump and once to get decent
+answers.'' \cw{gweave} already makes a silent pass over the whole web before the
+pass that writes its output, and \cw{gtwill} primes the pump in that first pass,
+so a single run gives the decent answers.
+
+\TeX\ must still run twice. The first pass says `This is the first pass!' and
+sets pages that look final except that the entries of each mini-index come in
+the order the sections cited them; it also writes those entries to
+\cw{foo.mref}. \cw{gtwill-refsort} sorts them, page by page, into
+\cw{foo.smref}, and the second pass, finding that file, says `This is the second
+pass!' and sets them alphabetized. (\.{CTWILL} calls these files \cw{.ref} and
+\cw{.sref}; \.{GTWILL} adds an \cw{m}, because a web is apt to keep a \cw{.ref}
+file of its own.) Should you change the web, delete \cw{foo.smref} and start
+over: it describes pages that no longer exist. If it ends early, \TeX\ says so in
+the log. Saying \cw{\bs let\bs norefs=\bs relax} before \cw{\bs input gtwimac}, that
+is, on the command line, reads and writes neither file:
+\begincode
+luatex "\let\norefs=\relax \input foo"
+|endcode
+
+\section{Proofmode}
+\cw{gtwill -P} makes the woven file load \cw{gtproofmac.tex} instead of
+\cw{gtwimac.tex}. \TeX\ then sets \cw{gweave}'s ordinary pages, without
+mini-indexes, and follows each section with the entries it generates. Check
+your hints there before making mini-indexes: mini-indexes can mask errors when
+the page breaks are favorable, and the errors may reveal themselves later, after
+your program has changed. The proofmode output is much easier to check than the
+mini-indexes themselves.
+
+\chapter{Hints in the change file}
+\noindent The meanings \cw{gtwill} concocts are not always right. Your
+exposition may talk about \cw{f(x)} without meaning program variables \cw{f} and
+\cw{x}; a name may be defined in another web, unknown to \cw{gtwill}; a name may
+be defined in several places, and \cw{gtwill} won't know which definition to
+choose. Book production with \.{CTWILL} always involved a change file of hints,
+and so does it here. These control codes are \cw{gtwill}'s alone; \cw{gtangle}
+skips them, which is no problem, since you use them only in the change files you
+set up for publishing.
+
+\section{\cw{@\$}: a meaning}
+The operation
+\begincode
+@$s {FOO}3 \KW{int}@>
+|endcode
+changes the current meaning of \cw{s} to the \TeX\ text \cw{\bs KW\lb int\rb},
+defined in section~3 of the program whose title is {\sc FOO}. It has four
+components: an identifier, followed by a space; a program title, in braces; a
+section number, followed by a space; and a \TeX\ part. If the \TeX\ part starts
+with \cw{=}, the entry has an equals sign instead of a colon:
+\cw{@\$bufSize \lb PROG\rb 10 =\bs NU\lb 200\rb @>} gives ``{\it bufSize\/} $=$
+200, \S10'' or ``{\it bufSize\/} $=$ 200, {\sc PROG}\thinspace\S10,'' depending on
+whether {\sc PROG} is the title of the current program. If the \TeX\ part is
+\cw{\bs zip}, the entry has neither colon nor equals sign, just a comma. The
+title of the current program is what its limbo gives to \cw{\bs def\bs title};
+failing that, it is the base name of the output file.
+
+The title and section number can also be replaced by a string in doublequotes:
+\cw{@\$Println "fmt" \bs zip@>} gives ``{\it Println}, \cw{fmt}.'' Such a string is
+set in typewriter as it stands; you need not escape the characters special to
+\TeX\ in it, since \cw{gtwill} escapes them, so that a name from the file
+\cw{"gb\_graph.w"} can say so.
+
+\section{\cw{@\%}: temporary meanings}
+After \cw{@\%}, the \cw{@\$} operations up to the beginning of the next section
+define {\it temporary\/} meanings instead of permanent ones. A temporary meaning
+goes into the mini-index of the current section; the permanent meaning of the
+identifier is not changed, nor does it appear in that section's entries. If
+several temporary meanings are given to one identifier in a section, all of them
+appear. Each \cw{@\%} toggles the convention, so after an even number of them
+the meanings are permanent again. (In \cw{gweave} and \cw{gtangle}, \cw{@\%}
+begins a comment that runs to the end of the line; \cw{gtwill} gives it
+\.{CTWILL}'s meaning instead, so a web woven by \cw{gtwill} should not use it as a
+comment.)
+
+\section{\cw{@-}: no entry}
+\cw{@-foo@>} says that \cw{foo} should not generate a mini-index entry in the
+current section, unless a temporary meaning is assigned. If a later
+declaration in that section would give \cw{foo} a new permanent meaning, the
+current meaning is not redefined, and that current meaning, which an
+\cw{@\$foo ...@>} may have set, is what goes into the \cw{.aux} file. So you can
+keep \cw{gtwill} from contaminating the \cw{.aux} file with things you don't
+like.
+
+\section{\cw{@r}: a right-hand page}
+\cw{@r} (or \cw{@R}) puts the macro \cw{\bs shortpage} before the next section,
+which then appears at the top of a right-hand page, if it would ordinarily have
+appeared near the bottom of a left-hand page and split across the pages. If the
+next section is starred, \cw{@r} inverts the left/right logic: the starred
+section is postponed to a left-hand page if it would begin on a right-hand page,
+or vice versa. Both are fragile; use them only when fine-tuning a set of pages.
+The macro \cw{\bs forcebr}, in a \TeX\ part, ends the spread before the next
+section.
+
+\section{The \cw{.aux} and \cw{.bux} files}
+The current meaning of every identifier is initially \cw{\bs uninitialized}.
+Then \cw{gtwill} reads the file \cw{system.bux}, if there is one; then the
+definitions the web itself makes; then \cw{foo.bux}. The \cw{.bux} files are
+looked for in the output directory, in the web's own directory, and in the
+current directory, in that order. Like the \cw{.aux} files, they should contain
+only \cw{@\$} specifications, as the name says: `bux' is the plural of `\$'. They
+may also contain \cw{@i} includes.
+
+Every entry of \cw{foo.aux} is such an \cw{@\$} operation, one per line, so you
+can paste entries from it into a change file whenever you want to tell
+\cw{gtwill} about definitions that are out of order, and into the \cw{.bux} file
+of another web that uses them: that is how the programs of a book refer to one
+another. The convention is to put the definitions of library functions into
+\cw{system.bux}, and those of the specifically foo-ish packages that \cw{foo.w}
+imports into \cw{foo.bux}. For a book of several programs, run \cw{gtwill} on
+every web once to have all the \cw{.aux} files, make the \cw{.bux} files from
+them, and then weave and typeset each web in earnest.
+
+\chapter{The pages}
+\noindent \cw{gtwimac.tex} keeps everything of \cw{gwebmac.tex}---fonts,
+displayed code, links, index, contents---except the page builder. Each section is
+set by itself and added to the current spread unless the spread would then
+overflow; in that case the spread is shipped first, as a left-hand page cut off
+by \cw{\bs vsplit} and a right-hand page holding the rest and the mini-index. The
+left-hand page's running head shows the page number, the current starred
+section's title, the program's title, and the first section of the spread; the
+right-hand page's shows the last section, the title, and the page number.
+
+\section{Where it differs from \.{CTWILL}}
+\bull The page builder measures the mini-index instead of estimating it from the
+number of entries, and tries the left-hand page's \cw{\bs vsplit} before it
+accepts a section, so the right-hand page never overflows. A section longer than
+two pages continues on the next spread instead of overflowing, and there is no
+limit on the number of sections in a spread.
+
+\bull The index section, the index, the list of section names, and the contents
+are set as \cw{gweave} sets them: \cw{gtwill} writes \cw{\bs twilllast} before the
+last starred section, and \cw{gtwimac.tex} ships the last spread and goes back to
+\cw{gwebmac}'s ordinary pages. (\.{CTWILL} sets no index at all; Knuth gathered
+the indexes of a book's programs into one with \cw{twinx}.)
+
+\bull A change file meant for \cw{gtwill} is a big one, touching nearly
+everything, so the sections it touches are not starred, nor listed before the
+index, as \cw{gweave} would star and list them; and since none is marked as
+changed, a \cw{\bs let\bs maybe=\bs iffalse} in the limbo hides nothing.
+
+\chapter{Tuning}
+\noindent The pages are \cw{gwebmac}'s \cw{\bs pagewidth} by
+\cw{\bs pageheight}. These parameters, set in the limbo, shape the rest:
+
+\bull \cw{\bs miniextra} (1pc)---how much lower the right-hand page reaches, to
+make room for its mini-index;
+
+\bull \cw{\bs minisep} (11pt) and \cw{\bs minirulesep} (4pt)---the space above and
+below the rule over a mini-index;
+
+\bull \cw{\bs minicolsep} (1pc)---the space between its three columns;
+
+\bull \cw{\bs minibase} (9pt), \cw{\bs minitop} (7pt), and \cw{\bs minidepth}
+(3pt)---its baselineskip, its topskip, and the room below its last line;
+
+\bull \cw{\bs leftstretch}---how readily a left-hand page ends early at a section
+boundary. A page of code has no stretch, and without some every break would be
+equally bad.
+
+\noindent The words of an entry are macros too, for a localization to
+redefine: \cw{\bs minicolon} (`: '), \cw{\bs miniequals} (`\thinspace$=$\thinspace'),
+\cw{\bs twilllabel} (`label'), and \cw{\bs uninitialized} (`???'). A decoration
+drawn behind every page goes in \cw{\bs twillbackground}, which comes first on
+each page of a spread, as it would in a \cw{\bs plainoutput} of your own; it must
+take no room.
+
+As \cw{ctwimac.tex} does, \TeX\ writes to its log, for every section, how much
+room the spread would need with that section in it, and
+`(shortpage)' where a \cw{\bs shortpage} took effect. A section that runs on to
+the next spread is reported too. With these numbers and \cw{@r} and
+\cw{\bs forcebr}, a set of pages can be fine-tuned.
+
+\chapter{The master index}
+\begincode
+gtwill-twinx gbgraph.tex gbbasic.tex ... > index.tex
+luatex index
+|endcode
+\cw{gtwill-twinx} reads the index that \cw{gtwill} (or \cw{gweave}) puts at the end
+of each \cw{.tex} file, and the title from its \cw{\bs def\bs title\lb...\rb},
+and merges them: each entry cites the sections of each program under its title,
+in the order the files were given, with the sections of definition underlined.
+The result loads \cw{gtwinxmac.tex}, which sets it in two columns with
+\cw{gwebmac}'s index macros. If a file \cw{gtwinx-startup.tex} can be found,
+\cw{gtwinxmac.tex} reads it: that is the place for \cw{\bs input kotexgweb}, for a
+\cw{\bs def\bs title} (the default is `Index'), for a new \cw{\bs twinxtop} (the
+heading) or \cw{\bs twinxnext} (what goes between the citations of two programs),
+and for the macros that the programs' limbos define and their index entries use.
+
+\chapter{Weaving in Korean}
+\noindent A Korean web is woven by \cw{gtwill} as by \cw{gweave}: put
+\cw{\bs input kotexgweb} in its limbo and typeset with \cw{luatex}. The woven file
+reads \cw{gtwimac.tex} first and \cw{kotexgweb.tex} afterwards, and
+\cw{kotexgweb}'s own \cw{\bs eightpoint}, with its Hangul faces, replaces
+\cw{gtwimac}'s for the mini-indexes. The word \cw{\bs twilllabel} stays
+English unless you redefine it, in the limbo after the \cw{\bs input}:
+\begincode
+\input kotexgweb
+\def\twilllabel{레이블}
+|endcode
+
+\chapter{Installing \.{GTWILL}}
+\begincode
+make            # tangle the webs, build bin/gtwill and the two utilities
+make test       # go vet + go test
+make install    # the commands into GOBIN, the TeX macros into TEXMFHOME
+|endcode
+Only \GO/ is needed to build: \cw{gtangle} comes from the \.{GWEB} module pinned in
+\cw{go.mod} (\cw{go tool gtangle}), and the master \cw{gweave.w} is reached through
+a symbolic link \cw{gweb} into the module cache, which \cw{make} creates. To
+typeset you need \.{GWEB}'s \cw{gwebmac.tex} on the \TeX\ path as well
+(\.{GWEB}'s \cw{install.sh} puts it there), and a \TeX\ engine with e-\TeX:
+\cw{luatex} or \cw{pdftex}.
+
+\chapter{\.{GTWILL} is written in itself}
+\noindent Like \.{CTWILL}, which is \cw{cweave} with a change file
+(\cw{ctwill.ch}), \cw{gtwill} is \cw{gweave} with a change file: \cw{gtwill.ch}
+applies to \cw{cmd/gweave/gweave.w} of the pinned \.{GWEB} release, and
+\cw{gtangle} makes \cw{gtwill.go} of the two. The two utilities are webs of their
+own, \cw{refsort.w} and \cw{twinx.w}. The tests live in the webs too.
+\begincode
+make doc        # the listings, woven by gweave, into build/
+make selfdoc    # gtwill's own listing with mini-indexes, into build/self/
+make manual     # this manual; make manual-ko for the Korean one
+|endcode
+\cw{make doc} weaves \cw{gweave.w} with \cw{gtwill.ch} the ordinary way, with the
+changed sections starred; its second section is a manual in Knuth's words for
+\.{CTWILL}, kept where they still fit. \cw{make selfdoc} sets the same listing
+with \cw{gtwill} itself, as Knuth set \.{CWEB}'s with \.{CTWILL}.
+
+\vfill
+\centerline{\eightrm {\eighttt GTWILL}---mini-indexes for literate Go programs.}
+\bye

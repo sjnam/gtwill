@@ -1,0 +1,430 @@
+% gtwillman-ko.tex -- the GTWILL manual in Korean, a translation of gtwillman.tex.
+% Process with luatex (Hangul needs luatexko), for example
+%       TEXINPUTS=.:gweb: luatex gtwillman-ko.tex
+% or simply `make manual-ko' from the top of the repository.
+%
+% It keeps gtwillman.tex's own macros and layout, and loads kotexgweb.tex for
+% the Hangul fonts, as GWEB's gwebman-ko.tex does. When gtwillman.tex changes,
+% change this translation with it.
+
+\input gwebmac
+\input kotexgweb
+\pdffalse \dvipdffalse        % a plain manual: no hyperlinks or bookmarks
+\parskip=0pt plus 1pt
+\parindent=18pt
+\abovedisplayskip=.5\abovedisplayskip  \belowdisplayskip=.5\belowdisplayskip
+\abovedisplayshortskip=.5\abovedisplayshortskip
+\belowdisplayshortskip=.5\belowdisplayshortskip
+
+\font\eighttt=cmtt8
+\font\ninett=cmtt9
+\font\twelvett=cmtt12
+\font\eightit=cmti8
+\font\eightbf=cmbx8
+\font\logosl=logosl10 % the METAFONT logo, slanted for a book title
+\def\slMF{{\logosl META}\-{\logosl FONT}}
+% The 12-point Latin faces of gtwillman.tex, each paired with a Hangul face of
+% the same weight, the way kotexgweb pairs \tenbf with \tenbd. The Hangul face
+% is set at 0.962 of the size, the ratio hangulfont.tex uses for the serif.
+\font\latinauthorfont=cmr12
+\font\latinchapterfont=cmbx12
+\sethangulfont\twelvebd="Noto Serif CJK KR Bold:%
+  language=KOR;script=hang;interhangul=-0.04em;interlatincjk=.125em;%
+  charraise=-0.06em;+compresspunctuations;expansion=default;" at 11.54pt
+\def\authorfont{\latinauthorfont\twelvemj}
+\def\chapterfont{\latinchapterfont\twelvebd}
+
+%---inline code; @ < > = etc. are safe in \tt, so avoid braces inside \cw ---
+\def\cw#1{{\tt #1}}
+\def\bs{\char92 }                              % a literal backslash, in \tt
+\def\lb{\char123 }\def\rb{\char125 }           % literal braces, in \tt
+
+%---a centred chapter heading, in the manner of cwebman's \section ---
+\def\chapter#1{\penalty-500\bigskip
+  \centerline{\chapterfont\def\.##1{{\twelvett##1}}#1}\nobreak\vskip 6pt}
+%---a run-in bold subsection heading ---
+\def\section#1{\medskip\noindent{\bf #1.}\enspace\ignorespaces}
+
+%---a bulleted list item ---
+\def\bull{\smallskip\item{$\bullet$}}
+
+%---a verbatim code display (TeXbook recipe): | is the escape inside it ---
+\def\begincode{\par\medskip\begingroup
+  \def\do##1{\catcode`##1=12 }\dospecials
+  \catcode`\|=0
+  \obeylines \obeyspaces \tt \parindent=0pt \leftskip=\parindent\relax}
+\def\endcode{\endgroup\medskip\noindent}
+
+%---a sample mini-index: three columns under a rule, as gtwimac sets one ---
+\def\sampleentry#1{\hbox{#1}}
+\def\samplemini#1#2#3{\par\medskip
+  \hrule\kern4pt
+  \hbox to\hsize{\eightrm \def\it{\eightit}\def\bf{\eightbf}\let\tt=\eighttt
+    \baselineskip=9pt \vtop{#1}\hfil\vtop{#2}\hfil\vtop{#3}}%
+  \medskip\noindent}
+
+%---running heads, in the manner of cwebman ---
+\def\runninghead{{\ninett GTWILL} 사용자 설명서 (버전 0.10.7)}
+\def\lheader{\mainfont\folio\hfil{\eightrm\eightgt\runninghead}\hfil}
+\def\rheader{\hfil{\eightrm\eightgt\runninghead}\hfil\mainfont\folio}
+
+% =============================================================================
+% Title page (no running head), in the manner of cwebman.
+\headline={\hfil}\footline={\hfil}
+\null\vfill
+\centerline{\titlefont {\ttitlefont GTWILL} 시스템}
+\vskip 6pt
+\centerline{\chapterfont 문학적 Go 프로그램을 위한 미니 색인}
+\vskip 18pt
+\centerline{(버전 0.10.7)}
+\vskip 24pt
+\centerline{\authorfont 크누스의 {\ttitlefont CTWILL}을 본떠 만들다}
+\vfill
+\noindent
+이 글은 \.{GWEB}을 이미 아는 독자를 위한 \.{GTWILL} 안내서다. \.{GTWILL}은
+\cw{.w} 파일을 \cw{gweave}와 똑같이 짜되, 쪽을 마주 보는 두 쪽씩 짝지어 놓고
+오른쪽 쪽마다 아래에 {\it 미니 색인\/}을 단다. 미니 색인은 마주 보는 두 쪽이
+쓰기는 하지만 정의하지는 않는 식별자들의 목록이다. 식별자마다 그것이 무엇인지
+한마디와 그것을 정의한 절이 붙는다. \.{GTWILL}과 \.{GWEB}의 관계는 크누스의
+\.{CTWILL}과 \.{CWEB}의 관계와 같다. 그리고 \.{CTWILL}은 \.{TWILL}에서 나왔다.
+크누스가 1985년에 {\sl \TeX: The Program\/}과 {\sl \slMF: The Program\/}을
+펴낼 때 쓴, 공개하지 않은 \.{WEB} 프로그램이다. 그 이야기는 크누스의 글
+``Mini-indexes for literate programs''에 있고, 이 글은 {\sl Digital
+Typography\/}(1999), 225--245쪽에 다시 실렸다. 웹은 고치지 않아도 \cw{gtwill}로
+짤 수 있다. 다만 크누스가 겪었듯이 좋은 미니 색인을 얻으려면 품이 든다. 이
+설명서는 대부분 그 품에 관한 것이다.
+\pageno=0
+\vfil\eject
+
+% Running heads from the second page on.
+\headline={\ifodd\pageno\rheader\else\lheader\fi}
+
+\chapter{\.{GTWILL} 한눈에 보기}
+\noindent\.{GTWILL}은 \.{CTWILL}의 도구를 하나하나 그대로 본뜬다.
+
+\bull \cw{gtwill} $\approx$ \cw{ctwill}---웹을 짜면서 미니 색인 정보를 함께
+내놓는다.
+
+\bull \cw{gtwill-refsort} $\approx$ \cw{refsort}---두 번의 \TeX\ 조판 사이에서
+미니 색인 항목을 정렬한다.
+
+\bull \cw{gtwill-twinx} $\approx$ \cw{twinx}---여러 프로그램의 색인을 하나의
+종합 색인으로 합친다.
+
+\bull \cw{gtwimac.tex} $\approx$ \cw{ctwimac.tex}---미니 색인을 단 마주 보는 쪽을
+짜는 쪽 조판기다.
+
+\bull \cw{gtproofmac.tex} $\approx$ \cw{proofmac.tex}---절마다 그 항목들을 바로
+뒤에 늘어놓는 교정 모드다.
+
+\bull \cw{gtwinxmac.tex} $\approx$ \cw{twinxmac.tex}---종합 색인을 짠다.
+
+\noindent 웹 \cw{foo.w}와 그 변경 파일 \cw{foo.ch}로 한 바퀴를 돌면 이렇다.
+\begincode
+gtwill foo.w foo.ch                   # -> foo.tex, foo.aux
+luatex foo                            # first pass: -> foo.pdf, foo.mref
+gtwill-refsort < foo.mref > foo.smref
+luatex foo                            # second pass: mini-indexes alphabetized
+|endcode
+웹이 한글로 되어 있지 않다면 \cw{luatex} 대신 \cw{pdftex}을 써도 된다.
+
+\chapter{미니 색인이 말하는 것}
+\noindent 다음은 {\sl \TeX: The Program\/}을 \GO/로 옮겨 \.{GTWILL}로 짠 책에서
+어느 오른쪽 쪽의 아래 끝이다.
+\samplemini
+ {\sampleentry{{\it appendChar\/}: {\bf func}( ), \S53.}
+  \sampleentry{{\it curLength\/}: {\bf func}( ) {\bf int32}, \S52.}
+  \sampleentry{{\it flushChar\/}: {\bf func}( ), \S53.}
+  \sampleentry{{\it hh\/}: {\bf twoHalves}, \S129.}}
+ {\sampleentry{{\it mem\/}: [\,]{\bf memoryWord}, \S132.}
+  \sampleentry{{\it memEnd\/}: {\bf pointer}, \S134.}
+  \sampleentry{{\it memMin\/} = 0, \S13.}
+  \sampleentry{{\bf memoryWord} = {\bf struct}, \S129.}}
+ {\sampleentry{{\it printCurrentString\/}: {\bf func}( ), \S85.}
+  \sampleentry{{\it printLn\/}: {\bf func}( ), \S69.}
+  \sampleentry{{\it printStr\/}: {\bf func}( ), \S72.}
+  \sampleentry{{\it showBox\/}: {\bf func}( ), \S218.}}%
+항목마다 마주 보는 두 쪽이 쓰지만 정의하지 않는 식별자가 하나씩 온다. 식별자는
+색인에서와 같은 꼴로 찍는다. 형은 굵게, \cw{@d}로 든 이름이나 대문자로만 된
+상수는 타자체로, 나머지는 이탤릭으로 찍는다. 그 뒤에 콜론이 오고 그 식별자의
+{\it 뜻\/}이 온다. 상수나 형이면 콜론 대신 등호가 온다. 끝으로 그것을 정의한
+절이 온다. 다른 프로그램에서 정의한 이름이면 절 번호 앞에 그 프로그램의 제목을
+적어 {\sc GBGRAPH}\thinspace\S12처럼 찍고, 패키지나 파일에서 온 이름이면 그
+이름을 \cw{fmt}처럼 타자체로 적는다.
+
+\section{현재 뜻}
+명령 \cw{gtwill}은 \.{CTWILL}과 같은 방식으로 일한다. 식별자마다 현재 뜻이 있고,
+그 뜻은 식별자의 추상적인 형과 그것을 가장 최근에 정의한 절의 번호로 이루어진다.
+프로그램의 3절에 \cw{var s []byte}가 있으면, 명령 \cw{gtwill}이 그 절을 처리하는
+동안 이름 \cw{s}의 뜻은 ``\cw{[]byte}, \S3''이 된다. 10절에서 \cw{s}를 쓰는데,
+그사이 \cw{s}가 다시 정의되지 않았고 10절이 3절과 같은 두 쪽에 놓이지도 않는다면,
+10절이 놓인 두 쪽의 미니 색인에는 ``{\it s\/}: [\,]{\bf byte}, \S3.''이 실린다.
+명령 \cw{gtwill}은 절마다 끝에서 그 절이 쓰는 식별자의 목록을 뜻과 함께 \TeX{}에
+넘긴다. 그 가운데 어느 것을 어느 미니 색인에 넣을지는 쪽이 어떻게 나뉘는지를 보고
+\cw{gtwimac.tex}의 매크로가 정한다.
+
+\section{\GO/ 선언에서 읽는 뜻}
+\CEE/는 선언의 형을 누구나 볼 수 있게 적지만, \GO/는 흔히 그것을 컴파일러에
+맡긴다. 그리고 명령 \cw{gtwill}은 컴파일러가 아니다. \.{CTWILL}은 \cw{cweave}의
+문법이 반쯤 환원한 조각에서 정의를 읽어 낸다. 명령 \cw{gweave}에는 문법이 없고
+정의되는 이름 둘레의 토큰만 있으므로, 명령 \cw{gtwill}은 선언을 곧바로 읽는다.
+
+\bull 키워드 \cw{var}로 선언한 변수, 필드, 매개변수는 그 형을 뜻한다.
+
+\bull 키워드 \cw{type}으로 선언한 형은 $=$와 그 정의를 뜻한다. 다만
+\cw{struct}나 \cw{interface}의 몸통은 줄인다.
+
+\bull 키워드 \cw{const}로 선언한 상수는 그 값이 리터럴이거나 짧은 식(\cw{memTop
+- 11})이면 $=$와 그 값을 뜻하고, 그렇지 않으면 그 형을, 형도 없으면 그냥
+\cw{const}를 뜻한다.
+
+\bull 함수는 매개변수를 줄인 \cw{func( )}와 그 결과를 뜻하고, 메서드는
+\cw{(*T) func( )}와 그 결과를 뜻한다. 레이블은 \cw{label}을 뜻한다.
+
+\bull 짧은 선언 \cw{n := len(s)}에는 형이 적혀 있지 않다. 그래서 명령 \cw{gtwill}은
+값의 꼴을 보고 형을 짐작한다. 리터럴, 복합 리터럴, \cw{make}나 \cw{new}의 호출,
+형 변환, 함수 리터럴이 그런 꼴이다. 짐작할 수 없으면 \cw{var}라고만 한다.
+
+\noindent 매개변수 목록과 긴 배열 길이는 \.{CTWILL}이 줄이듯이 줄인다. 필드는
+\cw{struct}의 몸통 안에서 필드로 알아본다. 몸통 안의 절 참조 뒤에서도 그렇고,
+\cw{struct}가 필드들 사이에 끼워 넣는 절에서도 그렇다.
+
+\section{인용하지 않는 것}
+아무도 정의하지 않은 식별자는 눈에 띄도록 `???'로 인용한다. 다만 그것이 프로그램의
+평범한 이름일 때만 그렇다. 명령 \cw{gtwill}은 미리 선언된 이름(\cw{int},
+\cw{len}), 패키지의 이름(가져온 것이든 프로그램 자신의 것이든), 점으로 골라낸
+이름에 대해서는 입을 다문다. 점으로 골라낸 이름이란 \cw{fmt.Println}의
+\cw{Println}이나 \cw{b.Len()}의 \cw{Len}처럼 다른 패키지에 속한 이름이다. 그런
+이름도 \cw{@\$}(아래 참고)로 뜻을 주면 다른 이름처럼 인용된다.
+
+\chapter{프로그램 실행하기}
+\begincode
+gtwill [-P] [-o dir] file[.w] [change[.ch]]
+gtwill-refsort < file.mref > file.smref
+gtwill-twinx file.tex ... > index.tex
+|endcode
+명령 \cw{gtwill}은 \cw{gweave}의 인자와 플래그를 그대로 받는다. 확장자
+\cw{.w}와 \cw{.ch}는 빼도 되고, 옵션 \cw{-o}는 출력 디렉터리를 고르고,
+\cw{-version}은 버전을 찍는다. 여기에 교정 모드를 위한 \cw{-P}가 하나 더 있다(아래
+참고). 명령 \cw{gtwill}은 \cw{foo.tex} 말고도 \cw{foo.aux}를 쓴다. 이 파일은 웹
+자신의 정의를 다른 웹이 읽을 수 있는 꼴로 적어 둔다. 짜낸 파일은 \cw{\bs input
+gtwimac}으로 시작하고, 매크로 파일 \cw{gtwimac.tex}이 \cw{gwebmac}을 불러들인다.
+림보에 \cw{\bs input gwebmac}이 따로 있으면 빼 버린다.
+
+\section{한 번 실행, 두 번 조판}
+\.{CTWILL}은 두 번 실행해야 했다. 크누스의 말로는 ``한 번은 펌프에 마중물을 붓고,
+한 번은 쓸 만한 답을 얻기 위해서''다. 명령 \cw{gweave}는 출력을 쓰는 패스 앞에서
+이미 웹 전체를 소리 없이 한 번 훑는다. 명령 \cw{gtwill}은 그 첫 패스에서 마중물을
+부으므로, 한 번만 실행해도 쓸 만한 답을 얻는다.
+
+그래도 \TeX{}은 두 번 돌려야 한다. 첫 조판은 `This is the first pass!'라고 말하고,
+미니 색인의 항목들이 절들이 인용한 차례대로 놓인다는 점만 빼면 다 된 것처럼 보이는
+쪽을 짠다. 그리고 그 항목들을 \cw{foo.mref}에 쓴다. 명령 \cw{gtwill-refsort}가
+그것을 쪽마다 정렬해 \cw{foo.smref}에 쓰면, 두 번째 조판은 그 파일을 찾아
+`This is the second pass!'라고 말하고 항목들을 알파벳 차례로 짠다. (\.{CTWILL}은
+이 파일들을 \cw{.ref}와 \cw{.sref}라고 부른다. \.{GTWILL}은 \cw{m}을 덧붙였는데,
+웹이 제 \cw{.ref} 파일을 따로 둘 때가 많기 때문이다.) 웹을 고쳤다면
+\cw{foo.smref}를 지우고 처음부터 다시 한다. 그 파일은 이제 없는 쪽들을 기술하기
+때문이다. 그 파일이 너무 일찍 끝나면 \TeX{}이 로그에 그렇다고 적는다. 매크로 파일
+\cw{gtwimac}을 \cw{\bs input}하기 전에, 곧 명령 줄에서
+\cw{\bs let\bs norefs=\bs relax}라고 하면 두 파일을 읽지도 쓰지도 않는다.
+\begincode
+luatex "\let\norefs=\relax \input foo"
+|endcode
+
+\section{교정 모드}
+명령 \cw{gtwill -P}로 짜면 짜낸 파일이 \cw{gtwimac.tex} 대신 \cw{gtproofmac.tex}을
+불러들인다. 그러면 \TeX{}은 미니 색인 없이 \cw{gweave}의 보통 쪽을 짜고, 절마다
+바로 뒤에 그 절이 만드는 항목들을 늘어놓는다. 미니 색인을 만들기 전에 거기서 힌트를
+점검하라. 쪽이 운 좋게 나뉘면 미니 색인이 오류를 가려 버릴 수 있고, 그 오류는
+나중에 프로그램을 고친 뒤에야 드러날 수 있다. 교정 모드의 출력은 미니 색인 자체보다
+점검하기가 훨씬 쉽다.
+
+\chapter{변경 파일에 넣는 힌트}
+\noindent 명령 \cw{gtwill}이 지어낸 뜻이 늘 옳지는 않다. 서술에서 \cw{f(x)}를
+말하면서 프로그램 변수 \cw{f}와 \cw{x}를 뜻하지 않을 수도 있고, 어떤 이름은 다른
+웹에서 정의되어 명령 \cw{gtwill}이 모를 수도 있고, 어떤 이름은 여러 곳에서 정의되어
+어느 정의를 골라야 할지 모를 수도 있다. \.{CTWILL}로 책을 만들 때는 언제나 힌트를
+담은 변경 파일이 따랐고, 여기서도 그렇다. 아래의 제어 코드들은 \cw{gtwill}만의
+것이다. 명령 \cw{gtangle}은 이것들을 건너뛰는데, 출판용으로 마련하는 변경 파일에만
+쓰므로 문제 될 것이 없다.
+
+\section{\cw{@\$}: 뜻 주기}
+다음 연산은
+\begincode
+@$s {FOO}3 \KW{int}@>
+|endcode
+이름 \cw{s}의 현재 뜻을 \TeX\ 텍스트 \cw{\bs KW\lb int\rb}로 바꾸고, 그 정의가
+제목이 {\sc FOO}인 프로그램의 3절에 있다고 알린다. 이 연산은 네 부분으로 이루어진다.
+식별자와 그 뒤의 공백, 중괄호로 감싼 프로그램 제목, 절 번호와 그 뒤의 공백, 그리고
+\TeX\ 파트다. 그 \TeX\ 파트가 \cw{=}로 시작하면 항목에 콜론 대신 등호가 들어간다.
+연산 \cw{@\$bufSize \lb PROG\rb 10 =\bs NU\lb 200\rb @>}는 {\sc PROG}가 지금
+프로그램의 제목인지 아닌지에 따라 ``{\it bufSize\/} $=$ 200, \S10''이나
+``{\it bufSize\/} $=$ 200, {\sc PROG}\thinspace\S10''을 낳는다. 그 \TeX\ 파트가
+\cw{\bs zip}이면 항목에 콜론도 등호도 없이 쉼표만 들어간다. 지금 프로그램의
+제목은 그 림보가 \cw{\bs def\bs title}에 준 것이고, 그런 것이 없으면 출력 파일의
+기본 이름이다.
+
+프로그램 제목과 절 번호 자리에는 큰따옴표로 감싼 문자열을 둘 수도 있다. 연산
+\cw{@\$Println "fmt" \bs zip@>}는 ``{\it Println}, \cw{fmt}.''를 낳는다. 그런
+문자열은 적힌 그대로 타자체로 찍는다. 그 안에서 \TeX{}의 특수 문자를 막을 필요는
+없다. 명령 \cw{gtwill}이 막아 주므로, 파일 \cw{"gb\_graph.w"}에서 온 이름도 그렇게
+적으면 된다.
+
+\section{\cw{@\%}: 임시 뜻}
+연산 \cw{@\%} 뒤로는 다음 절이 시작될 때까지의 \cw{@\$} 연산들이 영구적인 뜻이
+아니라 {\it 임시\/} 뜻을 정의한다. 임시 뜻은 지금 절의 미니 색인에 들어간다. 그
+식별자의 영구적인 뜻은 바뀌지 않고, 그 절의 항목에도 나타나지 않는다. 한 절에서
+한 식별자에 임시 뜻을 여럿 주면 모두 나타난다. 연산 \cw{@\%}는 나올 때마다 이
+규약을 뒤집으므로, 짝수 번 나온 뒤에는 다시 영구적인 뜻이 된다. (명령 \cw{gweave}와
+\cw{gtangle}에서는 \cw{@\%}가 줄 끝까지 가는 주석을 시작한다. 명령 \cw{gtwill}은
+그 대신 \.{CTWILL}의 뜻을 주므로, \cw{gtwill}로 짤 웹에서는 그것을 주석으로 쓰지
+말아야 한다.)
+
+\section{\cw{@-}: 항목 빼기}
+연산 \cw{@-foo@>}는 이름 \cw{foo}가 지금 절에서 미니 색인 항목을 만들지 않게 한다.
+임시 뜻을 준 경우는 예외다. 그 절에서 나중에 선언이 \cw{foo}에 새 영구적인 뜻을
+주려 해도 현재 뜻은 다시 정의되지 않는다. 그리고 \cw{@\$foo ...@>}가 정했을 수도
+있는 그 현재 뜻이 \cw{.aux} 파일에 들어간다. 그래서 명령 \cw{gtwill}이 원치 않는
+것으로 \cw{.aux} 파일을 더럽히지 않게 막을 수 있다.
+
+\section{\cw{@r}: 오른쪽 쪽으로}
+연산 \cw{@r}(또는 \cw{@R})은 다음 절 앞에 매크로 \cw{\bs shortpage}를 둔다.
+그러면 그 절이 보통은 왼쪽 쪽의 아래쪽에 놓여 두 쪽에 걸쳐 나뉘었을 경우, 대신
+오른쪽 쪽의 맨 위에 놓인다. 다음 절이 별표 절이면 연산 \cw{@r}은 왼쪽과 오른쪽의
+논리를 뒤집는다. 별표 절이 오른쪽 쪽에서 시작할 참이면 왼쪽 쪽으로 미루고, 그
+반대도 마찬가지다. 둘 다 깨지기 쉬우니 한 벌의 쪽을 다듬을 때만 써라. 매크로
+\cw{\bs forcebr}을 \TeX\ 파트에 쓰면 다음 절 앞에서 두 쪽을 끝낸다.
+
+\section{\cw{.aux} 파일과 \cw{.bux} 파일}
+모든 식별자의 현재 뜻은 처음에 \cw{\bs uninitialized}다. 이어서 명령
+\cw{gtwill}은 파일 \cw{system.bux}가 있으면 읽고, 그다음 웹 자신이 하는 정의를
+읽고, 그다음 \cw{foo.bux}를 읽는다. 이 \cw{.bux} 파일들은 출력 디렉터리, 웹이 있는
+디렉터리, 현재 디렉터리의 차례로 찾는다. 이 파일들에는 \cw{.aux} 파일처럼
+\cw{@\$} 연산만 두어야 한다. 이름이 그렇게 말한다. `bux'는 `\$'의 복수형이다.
+\cw{@i}로 다른 파일을 포함할 수도 있다.
+
+파일 \cw{foo.aux}의 항목은 모두 그런 \cw{@\$} 연산이고 한 줄에 하나씩이다. 그래서
+차례가 어긋난 정의를 명령 \cw{gtwill}에 알려 주고 싶을 때는 거기서 항목을 떼어
+변경 파일에 붙이면 되고, 그 정의를 쓰는 다른 웹의 \cw{.bux} 파일에 붙여도 된다.
+한 책에 실린 프로그램들은 그렇게 서로를 참조한다. 관례는 라이브러리 함수의 정의를
+\cw{system.bux}에 두고, \cw{foo.w}가 가져오는 foo 고유의 패키지들의 정의를
+\cw{foo.bux}에 두는 것이다. 여러 프로그램으로 된 책이면, 먼저 모든 웹에 명령
+\cw{gtwill}을 한 번씩 돌려 \cw{.aux} 파일을 다 마련하고, 그것으로 \cw{.bux} 파일을
+만든 뒤, 웹마다 제대로 짜고 조판한다.
+
+\chapter{쪽}
+\noindent 매크로 파일 \cw{gtwimac.tex}은 \cw{gwebmac.tex}의 모든 것을 그대로 둔다.
+글꼴, 코드 조판, 링크, 색인, 목차가 다 그렇고, 쪽 조판기만 바꾼다. 절마다 따로
+짜서 지금의 두 쪽에 보태되, 보태면 넘칠 때는 먼저 그 두 쪽을 내보낸다. 이때 왼쪽
+쪽은 \cw{\bs vsplit}으로 잘라 내고, 오른쪽 쪽에는 나머지와 미니 색인을 담는다. 왼쪽
+쪽의 머리글에는 쪽 번호, 지금 별표 절의 제목, 프로그램의 제목, 두 쪽의 첫 절이
+찍히고, 오른쪽 쪽의 머리글에는 마지막 절, 제목, 쪽 번호가 찍힌다.
+
+\section{\.{CTWILL}과 다른 점}
+\bull 쪽 조판기는 미니 색인의 크기를 항목 수로 어림하지 않고 직접 잰다. 그리고 절을
+받아들이기 전에 왼쪽 쪽의 \cw{\bs vsplit}을 미리 해 보므로, 오른쪽 쪽이 넘치는 일이
+없다. 두 쪽보다 긴 절은 넘치는 대신 다음 두 쪽으로 이어지고, 두 쪽에 들어가는 절의
+수에도 한도가 없다.
+
+\bull 색인 절, 색인, 절 이름 목록, 목차는 \cw{gweave}가 짜는 대로 짠다. 명령
+\cw{gtwill}이 마지막 별표 절 앞에 \cw{\bs twilllast}를 쓰면, 매크로 파일
+\cw{gtwimac.tex}이 마지막 두 쪽을 내보내고 \cw{gwebmac}의 보통 쪽으로 돌아간다.
+(\.{CTWILL}은 색인을 아예 짜지 않는다. 크누스는 책에 실린 프로그램들의 색인을
+\cw{twinx}로 하나로 모았다.)
+
+\bull 명령 \cw{gtwill}을 위한 변경 파일은 거의 모든 것을 건드리는 큰 파일이다.
+그래서 \cw{gweave}처럼 그것이 건드린 절에 별표를 달거나 색인 앞에 늘어놓지
+않는다. 바뀌었다고 표시된 절이 하나도 없으므로, 림보의
+\cw{\bs let\bs maybe=\bs iffalse}도 아무것도 숨기지 않는다.
+
+\chapter{다듬기}
+\noindent 쪽의 크기는 \cw{gwebmac}의 \cw{\bs pagewidth}와 \cw{\bs pageheight}다.
+림보에서 정하는 다음 매개변수들이 나머지 꼴을 정한다.
+
+\bull \cw{\bs miniextra}(1pc)---오른쪽 쪽이 미니 색인을 담으려고 더 내려가는
+길이.
+
+\bull \cw{\bs minisep}(11pt)와 \cw{\bs minirulesep}(4pt)---미니 색인 위의 괘선
+위아래 간격.
+
+\bull \cw{\bs minicolsep}(1pc)---미니 색인의 세 단 사이 간격.
+
+\bull \cw{\bs minibase}(9pt), \cw{\bs minitop}(7pt), \cw{\bs minidepth}(3pt)---미니
+색인의 줄 간격, 첫 줄 위 간격, 마지막 줄 아래 여유.
+
+\bull \cw{\bs leftstretch}---왼쪽 쪽이 절 경계에서 얼마나 선뜻 일찍 끝나는지. 코드로
+찬 쪽에는 늘어날 여지가 없어서, 이것이 없으면 어디서 나누든 똑같이 나쁘다.
+
+\noindent 항목에 들어가는 말도 매크로라서 지역화할 때 다시 정의할 수 있다. 매크로
+\cw{\bs minicolon}(`: '), \cw{\bs miniequals}(`\thinspace$=$\thinspace'),
+\cw{\bs twilllabel}(`label'), \cw{\bs uninitialized}(`???')가 그렇다. 모든 쪽
+뒤에 그릴 장식은 \cw{\bs twillbackground}에 넣는다. 이것은 직접 만든
+\cw{\bs plainoutput}에서처럼 두 쪽의 각 쪽 맨 앞에 오며, 자리를 차지하지 않아야
+한다.
+
+\TeX{}은 \cw{ctwimac.tex}에서처럼 절마다 그 절을 넣으면 두 쪽에 얼마만큼의 자리가
+드는지를 로그에 적고, \cw{\bs shortpage}가 효과를 낸 곳에는 `(shortpage)'라고
+적는다. 다음 두 쪽으로 이어지는 절도 알린다. 이 수치와 \cw{@r}, \cw{\bs forcebr}로
+한 벌의 쪽을 다듬을 수 있다.
+
+\chapter{종합 색인}
+\begincode
+gtwill-twinx gbgraph.tex gbbasic.tex ... > index.tex
+luatex index
+|endcode
+명령 \cw{gtwill-twinx}는 \cw{gtwill}(또는 \cw{gweave})가 \cw{.tex} 파일마다 끝에
+두는 색인과, 그 파일의 \cw{\bs def\bs title\lb...\rb}에서 제목을 읽어 그것들을
+합친다. 항목마다 각 프로그램의 절들을 그 제목 아래 인용하는데, 프로그램은 파일을
+준 차례대로 늘어놓고 정의한 절에는 밑줄을 긋는다. 그 결과는 \cw{gtwinxmac.tex}을
+불러들이고, 이 매크로 파일이 \cw{gwebmac}의 색인 매크로로 결과를 두 단에 짠다.
+파일 \cw{gtwinx-startup.tex}을 찾을 수 있으면 \cw{gtwinxmac.tex}이 그것을 읽는다.
+거기에 \cw{\bs input kotexgweb}이나 \cw{\bs def\bs title}(기본값은 `Index')를
+두거나, 머리를 짜는 \cw{\bs twinxtop}과 두 프로그램의 인용 사이에 들어갈
+\cw{\bs twinxnext}를 새로 정의하거나, 프로그램들의 림보가 정의하고 그 색인
+항목이 쓰는 매크로를 두면 된다.
+
+\chapter{한글로 짜기}
+\noindent 한글 웹도 \cw{gweave}로 짤 때처럼 \cw{gtwill}로 짠다. 림보에
+\cw{\bs input kotexgweb}을 넣고 \cw{luatex}으로 조판한다. 짜낸 파일은
+\cw{gtwimac.tex}을 먼저 읽고 \cw{kotexgweb.tex}을 나중에 읽으므로, 한글 글꼴을 갖춘
+\cw{kotexgweb}의 \cw{\bs eightpoint}가 미니 색인에서 \cw{gtwimac}의 것을 대신한다.
+매크로 \cw{\bs twilllabel}은 다시 정의하지 않으면 영어로 남는다. 림보에서
+\cw{\bs input} 뒤에 다시 정의하면 된다.
+\begincode
+\input kotexgweb
+\def\twilllabel{레이블}
+|endcode
+
+\chapter{\.{GTWILL} 설치하기}
+\begincode
+make            # tangle the webs, build bin/gtwill and the two utilities
+make test       # go vet + go test
+make install    # the commands into GOBIN, the TeX macros into TEXMFHOME
+|endcode
+빌드에는 \GO/만 있으면 된다. 명령 \cw{gtangle}은 \cw{go.mod}가 고정한 \.{GWEB}
+모듈에서 오고(\cw{go tool gtangle}), 바탕이 되는 \cw{gweave.w}는 모듈 캐시를
+가리키는 심볼릭 링크 \cw{gweb}을 거쳐 닿는다. 그 링크는 \cw{make}가 만든다.
+조판하려면 \.{GWEB}의 \cw{gwebmac.tex}도 \TeX\ 경로에 있어야 하고(\.{GWEB}의
+\cw{install.sh}가 거기 넣어 준다), e-\TeX\ 기능을 갖춘 \TeX\ 엔진, 곧 \cw{luatex}이나
+\cw{pdftex}이 있어야 한다.
+
+\chapter{\.{GTWILL}은 제 자신으로 쓰였다}
+\noindent \.{CTWILL}이 \cw{cweave}에 변경 파일(\cw{ctwill.ch})를 더한 것이듯,
+명령 \cw{gtwill}은 \cw{gweave}에 변경 파일을 더한 것이다. 변경 파일
+\cw{gtwill.ch}는 고정된 \.{GWEB} 릴리스의 \cw{cmd/gweave/gweave.w}에 적용되고,
+명령 \cw{gtangle}이 그 둘로 \cw{gtwill.go}를 만든다. 두 보조 프로그램은 저마다
+따로 된 웹 \cw{refsort.w}와 \cw{twinx.w}에서 나온다. 테스트도 웹 안에 있다.
+\begincode
+make doc        # the listings, woven by gweave, into build/
+make selfdoc    # gtwill's own listing with mini-indexes, into build/self/
+make manual     # this manual; make manual-ko for the Korean one
+|endcode
+명령 \cw{make doc}은 \cw{gweave.w}에 \cw{gtwill.ch}를 적용해 보통 방식으로 짜고,
+바뀐 절에 별표를 단다. 그 둘째 절은 \.{CTWILL}에 대한 크누스의 설명서를, 그 말이
+아직 들어맞는 곳에서는 그대로 살린 설명서다. 명령 \cw{make selfdoc}은 크누스가
+\.{CWEB}의 리스팅을 \.{CTWILL}로 짰듯이, 같은 리스팅을 \cw{gtwill} 자신으로 짠다.
+
+\vfill
+\centerline{\eightrm\eightgt {\eighttt GTWILL}---문학적 Go 프로그램을 위한 미니 색인.}
+\bye

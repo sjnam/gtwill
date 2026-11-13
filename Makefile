@@ -5,6 +5,7 @@
 #   make install    # the commands into GOBIN, the TeX macros into TEXMFHOME
 #   make doc        # the listings, woven by gweave and set by luatex, into build/
 #   make selfdoc    # gtwill's own listing with mini-indexes, set twice, into build/
+#   make manual     # the user manual (manual-ko: in Korean), into build/
 #   make clean
 #
 # gtwill is gweave with a change file, as CTWILL is CWEAVE with ctwill.ch: the
@@ -23,7 +24,7 @@ MACROS  := gtwimac.tex gtproofmac.tex gtwinxmac.tex
 CMDS    := gtwill gtwill-refsort gtwill-twinx
 TEXPATH := TEXINPUTS="$(CURDIR):$(CURDIR)/gweb:"
 
-.PHONY: all build generate tangle test install uninstall doc selfdoc clean
+.PHONY: all build generate tangle test install uninstall doc selfdoc manual manual-ko clean
 
 all: build
 
@@ -80,6 +81,19 @@ selfdoc: build
 		../../$(BIN)/gtwill-refsort < gweave.mref > gweave.smref && \
 		$(TEXPATH) $(LUATEX) -interaction=nonstopmode gweave.tex >/dev/null && \
 		echo "build/self/gweave.pdf: `grep -ac 'Overfull\|Underfull\|Error\|Missing\|Undefined' gweave.log` warnings"
+
+# The user manual, formatted like GWEB's gwebman.tex, and its Korean translation.
+# Both are set by luatex, with luatexko and the Noto CJK KR fonts of GWEB's
+# hangulfont.tex: the English one shows a line of Korean too.
+manual: gweb
+	mkdir -p build
+	cd build && $(TEXPATH) $(LUATEX) -interaction=nonstopmode ../gtwillman.tex >/dev/null; \
+		echo "build/gtwillman.pdf: `grep -ac 'Overfull\|Underfull\|Error\|Missing\|Undefined' gtwillman.log` warnings"
+
+manual-ko: gweb
+	mkdir -p build
+	cd build && $(TEXPATH) $(LUATEX) -interaction=nonstopmode ../gtwillman-ko.tex >/dev/null; \
+		echo "build/gtwillman-ko.pdf: `grep -ac 'Overfull\|Underfull\|Error\|Missing\|Undefined' gtwillman-ko.log` warnings"
 
 clean:
 	rm -rf $(BIN) build

@@ -28,9 +28,13 @@ hh: twoHalves, §129.               memoryWord = struct, §129.         showBox:
 
 Like CTWILL, which is CWEAVE with a change file (`ctwill.ch`), `gtwill` is
 `gweave` with a change file: [`gtwill.ch`](gtwill.ch) applies to
-`cmd/gweave/gweave.w` of the GWEB release pinned in [`go.mod`](go.mod). The user
-manual is the second section of that change file, and it reads best in the woven
-listing (`make doc`).
+`cmd/gweave/gweave.w` of the GWEB release pinned in [`go.mod`](go.mod).
+
+The user manual is [`gtwillman.tex`](gtwillman.tex) (`make manual`), formatted
+like GWEB's `gwebman.tex`; a Korean translation,
+[`gtwillman-ko.tex`](gtwillman-ko.tex), is built with `luatex` by
+`make manual-ko`. The second section of the change file is a shorter manual in
+Knuth's words for CTWILL, and it reads best in the woven listing (`make doc`).
 
 ## Build and install
 
@@ -161,6 +165,8 @@ cmd/gtwill-twinx/          twinx.w   -> twinx.go
 gtwimac.tex                TeX macros for gtwill's output (CTWILL's ctwimac.tex)
 gtproofmac.tex             proofmode macros (CTWILL's proofmac.tex)
 gtwinxmac.tex              master-index macros (CTWILL's twinxmac.tex)
+gtwillman.tex              the user manual (make manual; luatex)
+gtwillman-ko.tex           the manual in Korean (make manual-ko; luatex)
 gweb -> module cache       the pinned GWEB release, made by `make`
 LICENSE                    the Unlicense
 ```
