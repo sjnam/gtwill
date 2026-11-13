@@ -1,5 +1,7 @@
 # GTWILL — mini-indexes for literate Go
 
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](LICENSE)
+
 **GTWILL** is the [GWEB](https://github.com/sjnam/gweb) counterpart of Donald
 Knuth's **CTWILL**, the program that typeset Knuth's own literate programs as
 books — *The Stanford GraphBase*, *MMIXware*, and, through its ancestor TWILL,
@@ -160,4 +162,12 @@ gtwimac.tex                TeX macros for gtwill's output (CTWILL's ctwimac.tex)
 gtproofmac.tex             proofmode macros (CTWILL's proofmac.tex)
 gtwinxmac.tex              master-index macros (CTWILL's twinxmac.tex)
 gweb -> module cache       the pinned GWEB release, made by `make`
+LICENSE                    the Unlicense
 ```
+
+## License
+
+**GTWILL** is released into the public domain under [the Unlicense](LICENSE),
+like **GWEB**, whose `gweave.w` it changes: anyone may copy, modify, publish,
+use, compile, sell, or distribute it, for any purpose, without asking. This
+covers `gtwill.ch`, `gtwill-refsort`, `gtwill-twinx`, and the TeX macros.

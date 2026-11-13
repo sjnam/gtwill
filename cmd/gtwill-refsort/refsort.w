@@ -6,7 +6,7 @@
   \centerline{(GTWILL Version 0.10.7)}
   \vfill}
 \def\botofcontents{\vfill\centerline{\smallfont
-  Copyright \copyright\ 2026 Soojin Nam. MIT License.}}
+  Soojin Nam, 2026. Released into the public domain.}}
 
 @* Introduction.
 This short program sorts the mini-indexes of listings prepared by \.{gtwill}.
