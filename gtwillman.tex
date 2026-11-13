@@ -44,10 +44,12 @@
 %---a bulleted list item ---
 \def\bull{\smallskip\item{$\bullet$}}
 
-%---a verbatim code display (TeXbook recipe): | is the escape inside it ---
+%---a verbatim code display (TeXbook recipe): | is the escape inside it.
+%   Each line is a paragraph of its own; a \nobreak after each keeps the
+%   display on one page ---
 \def\begincode{\par\medskip\begingroup
   \def\do##1{\catcode`##1=12 }\dospecials
-  \catcode`\|=0
+  \catcode`\|=0 \def\par{\endgraf\nobreak}%
   \obeylines \obeyspaces \tentt\tentz \parindent=0pt \leftskip=\parindent\relax}
 \def\endcode{\endgroup\medskip\noindent}
 
@@ -324,6 +326,97 @@ another. The convention is to put the definitions of library functions into
 imports into \cw{foo.bux}. For a book of several programs, run \cw{gtwill} on
 every web once to have all the \cw{.aux} files, make the \cw{.bux} files from
 them, and then weave and typeset each web in earnest.
+
+\chapter{Keeping the hints outside the web}
+\noindent Hints written by hand into a change file soon become a nuisance in
+two ways. One is the section numbers: those written in an \cw{@\$} go wrong
+whenever a section is added to the web or taken out. The other is the \TeX: a
+meaning written by hand, like \cw{\bs KW\lb int\rb}, easily drifts from the
+form in which \cw{gtwill} sets the meanings it reads off declarations. So the
+\GO/ translations of Knuth's programs \cw{go-sgb}, \cw{go-mmix}, and
+\cw{go-advent} keep a directory \cw{twill} in the repository, and everything
+the mini-indexes need lives there. The original is \cw{go-sgb}'s; \cw{go-mmix}
+adapted it, and \cw{go-advent} cut it down for a single web. This chapter takes
+\cw{go-advent} as its example.
+\begincode
+twill/hints.txt     # the hints, one name per line, kept by hand
+twill/bux.py        # writes system.bux and advent.bux before gtwill runs
+|endcode
+These two files are all that is committed. The two \cw{.bux} files that
+\cw{bux.py} makes are generated, so they go in \cw{.gitignore}, and to change
+them you change \cw{hints.txt}. The web itself never changes for the sake of a
+hint, so what \cw{gtangle} and \cw{gweave} see stays as it is.
+
+\section{The form of a hint}
+Each line of \cw{hints.txt} gives a name, a place, and a meaning. Here are two
+of \cw{go-advent}'s hints: names of Knuth's \.{CWEB} original that the
+commentary mentions in \cw{|...|} but the \GO/ code does not have, given as
+their meaning the \GO/ that takes their place.
+\begincode
+change_to "advent.w" =changeTo
+fgets "C" -
+|endcode
+The place is written thus:
+
+\bull \cw{\S}---the section of this web in which the name first appears inside
+\cw{|...|}. The script finds the number every time the pages are made, so adding
+or removing sections does not throw it off.
+
+\bull \cw{\S12}---section~12. The script checks that the name really appears in
+that section's \cw{|...|}.
+
+\bull \cw{gbwords\S}---a section of another web, as used in \cw{go-sgb} and
+\cw{go-mmix}, which have many.
+
+\bull \cw{"advent.w"}---a doublequoted string: the name of an original file or a
+\GO/ package, and \cw{"C"} for the \CEE/ language or its standard library.
+
+\noindent The meaning is written in \GO/, not in \TeX. With an equals sign
+(\cw{=}) in front it is set after an equals sign, with a colon (\cw{:}) after a
+colon, and a hyphen (\cw{-}) alone sets only the place (\cw{\bs zip}). The script
+weaves these pieces of \GO/ with \cw{gweave}, together with the web's limbo, and
+puts the resulting \cw{\bs PB\lb...\rb} into the \cw{@\$} operation. So a meaning
+given as a hint is set exactly like one read off a declaration, and the types the
+web defines come out bold there too.
+
+\section{The two \cw{.bux} files}
+Before \cw{gtwill} runs, \cw{bux.py} writes two \cw{.bux} files. The file
+\cw{advent.bux} gets the hints of \cw{hints.txt}. The file \cw{system.bux} gets
+the names that the web uses without defining them: in \cw{go-advent}, the
+variables, with their types, declared by \cw{cavedata.go} and \cw{objdata.go},
+data dumped from the \CEE/ original. Those files do not come from a web, so their
+names would otherwise be cited as `???'. With several webs \cw{system.bux} has
+more to do. For each package that a web imports, \cw{go-mmix}'s script collects
+from the \cw{.aux} files of that package's webs only the exported names, since
+those files hold local variables too. It also collects the names declared by
+sibling webs of the same package, and drops altogether a name that two places
+define differently: better not to cite a name than to cite it wrong.
+
+\cw{gtwill} reads \cw{system.bux}, the web's own definitions, and
+\cw{advent.bux}, in that order. So the web's own definitions win over imported
+names, and the hints win over both. The two files are written where \cw{gtwill}
+looks for them, in the web's own directory.
+
+\section{\cw{make twill}}
+\cw{go-advent}'s \cw{Makefile} wraps it all up in \cw{make twill}:
+\begincode
+python3 twill/bux.py advent              # -> system.bux, advent.bux
+gtwill advent.w                          # -> advent.tex, advent.aux
+luatex --jobname=advent-twill advent.tex # first pass
+gtwill-refsort < advent-twill.mref > advent-twill.smref
+luatex --jobname=advent-twill advent.tex # second pass
+|endcode
+\cw{gtwill} writes \cw{advent.tex}, as \cw{gweave} does; typesetting it under
+the job name \cw{advent-twill} keeps the \cw{.pdf}, \cw{.log}, \cw{.mref}, and
+\cw{.smref} apart from those of \cw{make doc}. The old \cw{.smref} and \cw{.pdf}
+are removed before the first pass: the old \cw{.smref} describes pages that no
+longer exist, and an old \cw{.pdf} would hide a failed run. At the end two
+numbers are counted: the typesetting warnings in the log, and the
+\cw{\bs uninitialized} entries left in the \cw{.smref}, those set as `???' for
+want of a meaning. The work is done when both are zero. With several webs, as the
+previous chapter said, first run \cw{gtwill} on every web once to have all the
+\cw{.aux} files, and then run the script, \cw{gtwill}, and the two passes on each
+web in turn.
 
 \chapter{The pages}
 \noindent \cw{gtwimac.tex} keeps everything of \cw{gwebmac.tex}---fonts,
