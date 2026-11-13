@@ -70,13 +70,13 @@ page breaks hide them.
 A web needs no change to be woven by `gtwill`; but book production with CTWILL
 always involved a change file of hints, and so does it here:
 
-| code            | meaning                                                                |
-|-----------------|------------------------------------------------------------------------|
-| `@$id {PROG}12 tex@>` | give `id` the meaning `tex`, defined in section 12 of program PROG |
-| `@$id "pkg" tex@>`    | ... defined in the package or header `pkg`                        |
-| `@%`            | toggle: the `@$`s that follow, up to the next section, are temporary   |
-| `@-id@>`        | no mini-index entry for `id` in this section                           |
-| `@r`            | `\shortpage` before the next section (`@r@*` inverts left and right)   |
+| code                  | meaning                                                              |
+|-----------------------|----------------------------------------------------------------------|
+| `@$id {PROG}12 tex@>` | give `id` the meaning `tex`, defined in section 12 of program PROG   |
+| `@$id "pkg" tex@>`    | ... defined in the package or header `pkg`                           |
+| `@%`                  | toggle: the `@$`s that follow, up to the next section, are temporary |
+| `@-id@>`              | no mini-index entry for `id` in this section                         |
+| `@r`                  | `\shortpage` before the next section (`@r@*` inverts left and right) |
 
 A TeX part beginning with `=` is set after an equals sign instead of a colon, and
 `\zip` makes an entry with neither. A doublequoted location is set in typewriter
