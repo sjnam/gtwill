@@ -382,7 +382,7 @@ fgets "C" -
 묶는다.
 \begincode
 python3 twill/bux.py advent              # -> system.bux, advent.bux
-gtwill advent.w                          # -> advent.tex, advent.aux
+gtwill advent.gw                         # -> advent.tex, advent.aux
 luatex --jobname=advent-twill advent.tex # first pass
 gtwill-refsort < advent-twill.mref > advent-twill.smref
 luatex --jobname=advent-twill advent.tex # second pass

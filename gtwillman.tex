@@ -403,7 +403,7 @@ looks for them, in the web's own directory.
 \cw{go-advent}'s \cw{Makefile} wraps it all up in \cw{make twill}:
 \begincode
 python3 twill/bux.py advent              # -> system.bux, advent.bux
-gtwill advent.w                          # -> advent.tex, advent.aux
+gtwill advent.gw                         # -> advent.tex, advent.aux
 luatex --jobname=advent-twill advent.tex # first pass
 gtwill-refsort < advent-twill.mref > advent-twill.smref
 luatex --jobname=advent-twill advent.tex # second pass
