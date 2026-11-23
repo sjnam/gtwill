@@ -1,9 +1,9 @@
-% refsort.w -- sort the mini-index entries of a gtwill listing
+% refsort.gw -- sort the mini-index entries of a gtwill listing
 \def\title{GTWILL-REFSORT}
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GTWILL-REFSORT} program}
   \vskip 15pt
-  \centerline{(GTWILL Version 0.10.7)}
+  \centerline{(GTWILL Version 0.11.0)}
   \vfill}
 \def\botofcontents{\vfill\centerline{\smallfont
   Soojin Nam, 2026. Released into the public domain.}}
@@ -14,7 +14,7 @@ It is Knuth's \.{refsort}, from the \.{CTWILL} package, rewritten in \GO/ for th
 \.{GWEB} system, and I have kept to it except where \.{gtwill}'s output differs
 from \.{CTWILL}'s.
 
-More precisely, suppose you have said \.{gtwill} \.{foo.w}, getting a file
+More precisely, suppose you have said \.{gtwill} \.{foo.gw}, getting a file
 \.{foo.tex}, and that you've then said \.{luatex} \.{foo.tex}, getting files
 \.{foo.pdf} and \.{foo.mref}. If you're happy with \.{foo.pdf} except for the
 alphabetic order of the mini-indexes, you can then say

@@ -9,7 +9,7 @@
 #   make clean
 #
 # gtwill is gweave with a change file, as CTWILL is CWEAVE with ctwill.ch: the
-# master is cmd/gweave/gweave.w of the GWEB release that go.mod pins, reached
+# master is cmd/gweave/gweave.gw of the GWEB release that go.mod pins, reached
 # through the symbolic link `gweb' into the module cache, and gtwill.ch changes
 # it. The two utilities are webs of their own. gtangle comes from the same GWEB
 # release (go.mod's `tool' line), so nothing but Go is needed to build.
@@ -36,11 +36,11 @@ gweb: go.mod
 # gtangle names its output after the master, so gweave.go becomes gtwill.go. It
 # runs in cmd/gtwill so that the //line directives point at the right files.
 generate tangle: gweb
-	cd cmd/gtwill && $(GTANGLE) -o . ../../gweb/cmd/gweave/gweave.w ../../gtwill.ch
+	cd cmd/gtwill && $(GTANGLE) -o . ../../gweb/cmd/gweave/gweave.gw ../../gtwill.ch
 	mv cmd/gtwill/gweave.go cmd/gtwill/gtwill.go
 	mv cmd/gtwill/gweave_test.go cmd/gtwill/gtwill_test.go
-	cd cmd/gtwill-refsort && $(GTANGLE) refsort.w
-	cd cmd/gtwill-twinx && $(GTANGLE) twinx.w
+	cd cmd/gtwill-refsort && $(GTANGLE) refsort.gw
+	cd cmd/gtwill-twinx && $(GTANGLE) twinx.gw
 
 build: generate
 	@for c in $(CMDS); do echo "$(GO) build -o $(BIN)/$$c ./cmd/$$c"; \
@@ -64,9 +64,9 @@ uninstall:
 # The listings, woven the ordinary way: gtwill's with its changed sections starred.
 doc: gweb
 	mkdir -p build
-	$(GWEAVE) -o build gweb/cmd/gweave/gweave.w gtwill.ch
-	$(GWEAVE) -o build cmd/gtwill-refsort/refsort.w
-	$(GWEAVE) -o build cmd/gtwill-twinx/twinx.w
+	$(GWEAVE) -o build gweb/cmd/gweave/gweave.gw gtwill.ch
+	$(GWEAVE) -o build cmd/gtwill-refsort/refsort.gw
+	$(GWEAVE) -o build cmd/gtwill-twinx/twinx.gw
 	cd build && for j in gweave refsort twinx; do \
 		$(TEXPATH) $(LUATEX) -interaction=nonstopmode $$j.tex >/dev/null; \
 		echo "$$j.pdf: `grep -ac 'Overfull\|Underfull\|Error\|Missing\|Undefined' $$j.log` warnings"; done
@@ -75,7 +75,7 @@ doc: gweb
 # gtwill, a first TeX pass, gtwill-refsort, and the second pass.
 selfdoc: build
 	mkdir -p build/self
-	$(BIN)/gtwill -o build/self gweb/cmd/gweave/gweave.w gtwill.ch
+	$(BIN)/gtwill -o build/self gweb/cmd/gweave/gweave.gw gtwill.ch
 	cd build/self && rm -f gweave.smref && \
 		$(TEXPATH) $(LUATEX) -interaction=nonstopmode gweave.tex >/dev/null && \
 		../../$(BIN)/gtwill-refsort < gweave.mref > gweave.smref && \

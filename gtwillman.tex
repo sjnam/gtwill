@@ -62,7 +62,7 @@
   \medskip\noindent}
 
 %---running heads, in the manner of cwebman ---
-\def\runninghead{{\ninett GTWILL} USER MANUAL (VERSION 0.10.7)}
+\def\runninghead{{\ninett GTWILL} USER MANUAL (VERSION 0.11.0)}
 \def\lheader{\mainfont\folio\hfil{\sc\runninghead}\hfil}
 \def\rheader{\hfil{\sc\runninghead}\hfil\mainfont\folio}
 
@@ -74,13 +74,13 @@
 \vskip 6pt
 \centerline{\sectionfont Mini-indexes for Literate Go Programs}
 \vskip 18pt
-\centerline{(Version 0.10.7)}
+\centerline{(Version 0.11.0)}
 \vskip 24pt
 \centerline{\authorfont modeled on Knuth's {\ttitlefont CTWILL}}
 \vfill
 \noindent
 This is a guide to \.{GTWILL} for readers who already know \.{GWEB}. \.{GTWILL}
-weaves a \cw{.w} file exactly as \cw{gweave} does, but it sets the pages in
+weaves a \cw{.gw} file exactly as \cw{gweave} does, but it sets the pages in
 facing pairs and puts a {\it mini-index\/} at the foot of every right-hand page:
 the identifiers that the two pages use but do not define, each with a word about
 what it is and the section that defines it. It is to \.{GWEB} what Knuth's
@@ -117,10 +117,10 @@ section is followed by its entries;
 
 \bull \cw{gtwinxmac.tex} $\approx$ \cw{twinxmac.tex}---the master index.
 
-\noindent The whole cycle for one web \cw{foo.w}, with its change file
+\noindent The whole cycle for one web \cw{foo.gw}, with its change file
 \cw{foo.ch}, is
 \begincode
-gtwill foo.w foo.ch                   # -> foo.tex, foo.aux
+gtwill foo.gw foo.ch                  # -> foo.tex, foo.aux
 luatex foo                            # first pass: -> foo.pdf, foo.mref
 gtwill-refsort < foo.mref > foo.smref
 luatex foo                            # second pass: mini-indexes alphabetized
@@ -202,13 +202,15 @@ like any other.
 
 \chapter{Running the programs}
 \begincode
-gtwill [-P] [-o dir] file[.w] [change[.ch]]
+gtwill [-P] [-o dir] file[.gw] [change[.ch]]
 gtwill-refsort < file.mref > file.smref
 gtwill-twinx file.tex ... > index.tex
 |endcode
-\cw{gtwill} takes the arguments and flags of \cw{gweave}---the \cw{.w} and
+\cw{gtwill} takes the arguments and flags of \cw{gweave}---the \cw{.gw} and
 \cw{.ch} may be omitted, \cw{-o} chooses the output directory, \cw{-version}
-prints the version---and one more, \cw{-P}, for proofmode (see below). Besides
+prints the version---and one more, \cw{-P}, for proofmode (see below). A bare
+\cw{foo} reads \cw{foo.gw}, or an old-style \cw{foo.w} if that is all there is,
+as \cw{gweave} does. Besides
 \cw{foo.tex} it writes \cw{foo.aux}, which records the web's own definitions
 in a form that other webs can read. The woven file begins with \cw{\bs input
 gtwimac}, which loads \cw{gwebmac}; a stray \cw{\bs input gwebmac} in the limbo is
@@ -322,7 +324,7 @@ can paste entries from it into a change file whenever you want to tell
 \cw{gtwill} about definitions that are out of order, and into the \cw{.bux} file
 of another web that uses them: that is how the programs of a book refer to one
 another. The convention is to put the definitions of library functions into
-\cw{system.bux}, and those of the specifically foo-ish packages that \cw{foo.w}
+\cw{system.bux}, and those of the specifically foo-ish packages that \cw{foo.gw}
 imports into \cw{foo.bux}. For a book of several programs, run \cw{gtwill} on
 every web once to have all the \cw{.aux} files, make the \cw{.bux} files from
 them, and then weave and typeset each web in earnest.
@@ -513,7 +515,7 @@ make test       # go vet + go test
 make install    # the commands into GOBIN, the TeX macros into TEXMFHOME
 |endcode
 Only \GO/ is needed to build: \cw{gtangle} comes from the \.{GWEB} module pinned in
-\cw{go.mod} (\cw{go tool gtangle}), and the master \cw{gweave.w} is reached through
+\cw{go.mod} (\cw{go tool gtangle}), and the master \cw{gweave.gw} is reached through
 a symbolic link \cw{gweb} into the module cache, which \cw{make} creates. To
 typeset you need \.{GWEB}'s \cw{gwebmac.tex} on the \TeX\ path as well
 (\.{GWEB}'s \cw{install.sh} puts it there), and a \TeX\ engine with e-\TeX:
@@ -522,15 +524,15 @@ typeset you need \.{GWEB}'s \cw{gwebmac.tex} on the \TeX\ path as well
 \chapter{\.{GTWILL} is written in itself}
 \noindent Like \.{CTWILL}, which is \cw{cweave} with a change file
 (\cw{ctwill.ch}), \cw{gtwill} is \cw{gweave} with a change file: \cw{gtwill.ch}
-applies to \cw{cmd/gweave/gweave.w} of the pinned \.{GWEB} release, and
+applies to \cw{cmd/gweave/gweave.gw} of the pinned \.{GWEB} release, and
 \cw{gtangle} makes \cw{gtwill.go} of the two. The two utilities are webs of their
-own, \cw{refsort.w} and \cw{twinx.w}. The tests live in the webs too.
+own, \cw{refsort.gw} and \cw{twinx.gw}. The tests live in the webs too.
 \begincode
 make doc        # the listings, woven by gweave, into build/
 make selfdoc    # gtwill's own listing with mini-indexes, into build/self/
 make manual     # this manual; make manual-ko for the Korean one
 |endcode
-\cw{make doc} weaves \cw{gweave.w} with \cw{gtwill.ch} the ordinary way, with the
+\cw{make doc} weaves \cw{gweave.gw} with \cw{gtwill.ch} the ordinary way, with the
 changed sections starred; its second section is a manual in Knuth's words for
 \.{CTWILL}, kept where they still fit. \cw{make selfdoc} sets the same listing
 with \cw{gtwill} itself, as Knuth set \.{CWEB}'s with \.{CTWILL}.

@@ -66,7 +66,7 @@
   \medskip\noindent}
 
 %---running heads, in the manner of cwebman ---
-\def\runninghead{{\ninett GTWILL} 사용자 설명서 (버전 0.10.7)}
+\def\runninghead{{\ninett GTWILL} 사용자 설명서 (버전 0.11.0)}
 \def\lheader{\mainfont\folio\hfil{\eightrm\eightgt\runninghead}\hfil}
 \def\rheader{\hfil{\eightrm\eightgt\runninghead}\hfil\mainfont\folio}
 
@@ -78,13 +78,13 @@
 \vskip 6pt
 \centerline{\chapterfont 문학적 Go 프로그램을 위한 미니 색인}
 \vskip 18pt
-\centerline{(버전 0.10.7)}
+\centerline{(버전 0.11.0)}
 \vskip 24pt
 \centerline{\authorfont 크누스의 {\ttitlefont CTWILL}을 본떠 만들다}
 \vfill
 \noindent
 이 글은 \.{GWEB}을 이미 아는 독자를 위한 \.{GTWILL} 안내서다. \.{GTWILL}은
-\cw{.w} 파일을 \cw{gweave}와 똑같이 짜되, 쪽을 마주 보는 두 쪽씩 짝지어 놓고
+\cw{.gw} 파일을 \cw{gweave}와 똑같이 짜되, 쪽을 마주 보는 두 쪽씩 짝지어 놓고
 오른쪽 쪽마다 아래에 {\it 미니 색인\/}을 단다. 미니 색인은 마주 보는 두 쪽이
 쓰기는 하지만 정의하지는 않는 식별자들의 목록이다. 식별자마다 그것이 무엇인지
 한마디와 그것을 정의한 절이 붙는다. \.{GTWILL}과 \.{GWEB}의 관계는 크누스의
@@ -121,9 +121,9 @@ Typography\/}(1999), 225--245쪽에 다시 실렸다. 웹은 고치지 않아도
 
 \bull \cw{gtwinxmac.tex} $\approx$ \cw{twinxmac.tex}---종합 색인을 짠다.
 
-\noindent 웹 \cw{foo.w}와 그 변경 파일 \cw{foo.ch}로 한 바퀴를 돌면 이렇다.
+\noindent 웹 \cw{foo.gw}와 그 변경 파일 \cw{foo.ch}로 한 바퀴를 돌면 이렇다.
 \begincode
-gtwill foo.w foo.ch                   # -> foo.tex, foo.aux
+gtwill foo.gw foo.ch                  # -> foo.tex, foo.aux
 luatex foo                            # first pass: -> foo.pdf, foo.mref
 gtwill-refsort < foo.mref > foo.smref
 luatex foo                            # second pass: mini-indexes alphabetized
@@ -201,14 +201,15 @@ luatex foo                            # second pass: mini-indexes alphabetized
 
 \chapter{프로그램 실행하기}
 \begincode
-gtwill [-P] [-o dir] file[.w] [change[.ch]]
+gtwill [-P] [-o dir] file[.gw] [change[.ch]]
 gtwill-refsort < file.mref > file.smref
 gtwill-twinx file.tex ... > index.tex
 |endcode
 명령 \cw{gtwill}은 \cw{gweave}의 인자와 플래그를 그대로 받는다. 확장자
-\cw{.w}와 \cw{.ch}는 빼도 되고, 옵션 \cw{-o}는 출력 디렉터리를 고르고,
+\cw{.gw}와 \cw{.ch}는 빼도 되고, 옵션 \cw{-o}는 출력 디렉터리를 고르고,
 \cw{-version}은 버전을 찍는다. 여기에 교정 모드를 위한 \cw{-P}가 하나 더 있다(아래
-참고). 명령 \cw{gtwill}은 \cw{foo.tex} 말고도 \cw{foo.aux}를 쓴다. 이 파일은 웹
+참고). 확장자 없이 \cw{foo}라고만 하면 \cw{gweave}처럼 \cw{foo.gw}를 읽고, 그것이
+없고 예전 방식의 \cw{foo.w}만 있으면 그것을 읽는다. 명령 \cw{gtwill}은 \cw{foo.tex} 말고도 \cw{foo.aux}를 쓴다. 이 파일은 웹
 자신의 정의를 다른 웹이 읽을 수 있는 꼴로 적어 둔다. 짜낸 파일은 \cw{\bs input
 gtwimac}으로 시작하고, 매크로 파일 \cw{gtwimac.tex}이 \cw{gwebmac}을 불러들인다.
 림보에 \cw{\bs input gwebmac}이 따로 있으면 빼 버린다.
@@ -310,7 +311,7 @@ luatex "\let\norefs=\relax \input foo"
 차례가 어긋난 정의를 명령 \cw{gtwill}에 알려 주고 싶을 때는 거기서 항목을 떼어
 변경 파일에 붙이면 되고, 그 정의를 쓰는 다른 웹의 \cw{.bux} 파일에 붙여도 된다.
 한 책에 실린 프로그램들은 그렇게 서로를 참조한다. 관례는 라이브러리 함수의 정의를
-\cw{system.bux}에 두고, \cw{foo.w}가 가져오는 foo 고유의 패키지들의 정의를
+\cw{system.bux}에 두고, \cw{foo.gw}가 가져오는 foo 고유의 패키지들의 정의를
 \cw{foo.bux}에 두는 것이다. 여러 프로그램으로 된 책이면, 먼저 모든 웹에 명령
 \cw{gtwill}을 한 번씩 돌려 \cw{.aux} 파일을 다 마련하고, 그것으로 \cw{.bux} 파일을
 만든 뒤, 웹마다 제대로 짜고 조판한다.
@@ -486,7 +487,7 @@ make test       # go vet + go test
 make install    # the commands into GOBIN, the TeX macros into TEXMFHOME
 |endcode
 빌드에는 \GO/만 있으면 된다. 명령 \cw{gtangle}은 \cw{go.mod}가 고정한 \.{GWEB}
-모듈에서 오고(\cw{go tool gtangle}), 바탕이 되는 \cw{gweave.w}는 모듈 캐시를
+모듈에서 오고(\cw{go tool gtangle}), 바탕이 되는 \cw{gweave.gw}는 모듈 캐시를
 가리키는 심볼릭 링크 \cw{gweb}을 거쳐 닿는다. 그 링크는 \cw{make}가 만든다.
 조판하려면 \.{GWEB}의 \cw{gwebmac.tex}도 \TeX\ 경로에 있어야 하고(\.{GWEB}의
 \cw{install.sh}가 거기 넣어 준다), e-\TeX\ 기능을 갖춘 \TeX\ 엔진, 곧 \cw{luatex}이나
@@ -495,15 +496,15 @@ make install    # the commands into GOBIN, the TeX macros into TEXMFHOME
 \chapter{\.{GTWILL}은 제 자신으로 쓰였다}
 \noindent \.{CTWILL}이 \cw{cweave}에 변경 파일(\cw{ctwill.ch})를 더한 것이듯,
 명령 \cw{gtwill}은 \cw{gweave}에 변경 파일을 더한 것이다. 변경 파일
-\cw{gtwill.ch}는 고정된 \.{GWEB} 릴리스의 \cw{cmd/gweave/gweave.w}에 적용되고,
+\cw{gtwill.ch}는 고정된 \.{GWEB} 릴리스의 \cw{cmd/gweave/gweave.gw}에 적용되고,
 명령 \cw{gtangle}이 그 둘로 \cw{gtwill.go}를 만든다. 두 보조 프로그램은 저마다
-따로 된 웹 \cw{refsort.w}와 \cw{twinx.w}에서 나온다. 테스트도 웹 안에 있다.
+따로 된 웹 \cw{refsort.gw}와 \cw{twinx.gw}에서 나온다. 테스트도 웹 안에 있다.
 \begincode
 make doc        # the listings, woven by gweave, into build/
 make selfdoc    # gtwill's own listing with mini-indexes, into build/self/
 make manual     # this manual; make manual-ko for the Korean one
 |endcode
-명령 \cw{make doc}은 \cw{gweave.w}에 \cw{gtwill.ch}를 적용해 보통 방식으로 짜고,
+명령 \cw{make doc}은 \cw{gweave.gw}에 \cw{gtwill.ch}를 적용해 보통 방식으로 짜고,
 바뀐 절에 별표를 단다. 그 둘째 절은 \.{CTWILL}에 대한 크누스의 설명서를, 그 말이
 아직 들어맞는 곳에서는 그대로 살린 설명서다. 명령 \cw{make selfdoc}은 크누스가
 \.{CWEB}의 리스팅을 \.{CTWILL}로 짰듯이, 같은 리스팅을 \cw{gtwill} 자신으로 짠다.

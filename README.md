@@ -5,7 +5,7 @@
 **GTWILL** is the [GWEB](https://github.com/sjnam/gweb) counterpart of Donald
 Knuth's **CTWILL**, the program that typeset Knuth's own literate programs as
 books — *The Stanford GraphBase*, *MMIXware*, and, through its ancestor TWILL,
-*TeX: The Program* and *METAFONT: The Program*. It weaves a `.w` file exactly as
+*TeX: The Program* and *METAFONT: The Program*. It weaves a `.gw` file exactly as
 `gweave` does, but sets the pages in facing pairs and puts a **mini-index** at the
 foot of every right-hand page: the identifiers that the two pages use but do not
 define, each with its meaning and the section that defines it.
@@ -28,7 +28,7 @@ hh: twoHalves, §129.               memoryWord = struct, §129.         showBox:
 
 Like CTWILL, which is CWEAVE with a change file (`ctwill.ch`), `gtwill` is
 `gweave` with a change file: [`gtwill.ch`](gtwill.ch) applies to
-`cmd/gweave/gweave.w` of the GWEB release pinned in [`go.mod`](go.mod).
+`cmd/gweave/gweave.gw` of the GWEB release pinned in [`go.mod`](go.mod).
 
 The user manual is [`gtwillman.tex`](gtwillman.tex) (`make manual`), formatted
 like GWEB's `gwebman.tex`; a Korean translation,
@@ -45,7 +45,7 @@ make install    # the commands into GOBIN, gtwimac/gtproofmac/gtwinxmac into TEX
 ```
 
 Only Go is needed to build: `gtangle` comes from the pinned GWEB module
-(`go tool gtangle`), and the master `gweave.w` is reached through a symbolic link
+(`go tool gtangle`), and the master `gweave.gw` is reached through a symbolic link
 `gweb` into the module cache, which `make` creates. To typeset you need GWEB's
 `gwebmac.tex` on the TeX path as well (GWEB's `install.sh` puts it there), and a
 TeX engine with e-TeX: `luatex` (for Korean, with `kotexgweb`) or `pdftex`.
@@ -53,7 +53,7 @@ TeX engine with e-TeX: `luatex` (for Korean, with `kotexgweb`) or `pdftex`.
 ## Usage
 
 ```sh
-gtwill foo.w [foo.ch]                        # -> foo.tex, foo.aux
+gtwill foo.gw [foo.ch]                       # -> foo.tex, foo.aux
 luatex foo                                   # first pass: -> foo.pdf, foo.mref
 gtwill-refsort < foo.mref > foo.smref
 luatex foo                                   # second pass: mini-indexes alphabetized
@@ -63,7 +63,7 @@ CTWILL had to be run twice, "once to prime the pump and once to get decent
 answers"; `gtwill` primes the pump in the silent pass that `gweave` makes over the
 web anyway, so one run is enough. TeX must still run twice, with the sort in
 between. Delete `foo.smref` whenever the web changes: it describes pages that no
-longer exist. `gtwill -P foo.w` produces proofmode output instead, in which every
+longer exist. `gtwill -P foo.gw` produces proofmode output instead, in which every
 section is followed by the entries it generates; check them there before the
 page breaks hide them.
 
@@ -158,10 +158,10 @@ the spread, for fine-tuning with `@r` and `\forcebr`.
 ## Repository layout
 
 ```text
-gtwill.ch                  changes to gweave.w that make gtwill (with its manual and tests)
-cmd/gtwill/                gtwill.go, tangled from gweb/cmd/gweave/gweave.w + gtwill.ch
-cmd/gtwill-refsort/        refsort.w -> refsort.go
-cmd/gtwill-twinx/          twinx.w   -> twinx.go
+gtwill.ch                  changes to gweave.gw that make gtwill (with its manual and tests)
+cmd/gtwill/                gtwill.go, tangled from gweb/cmd/gweave/gweave.gw + gtwill.ch
+cmd/gtwill-refsort/        refsort.gw -> refsort.go
+cmd/gtwill-twinx/          twinx.gw   -> twinx.go
 gtwimac.tex                TeX macros for gtwill's output (CTWILL's ctwimac.tex)
 gtproofmac.tex             proofmode macros (CTWILL's proofmac.tex)
 gtwinxmac.tex              master-index macros (CTWILL's twinxmac.tex)
@@ -174,6 +174,6 @@ LICENSE                    the Unlicense
 ## License
 
 **GTWILL** is released into the public domain under [the Unlicense](LICENSE),
-like **GWEB**, whose `gweave.w` it changes: anyone may copy, modify, publish,
+like **GWEB**, whose `gweave.gw` it changes: anyone may copy, modify, publish,
 use, compile, sell, or distribute it, for any purpose, without asking. This
 covers `gtwill.ch`, `gtwill-refsort`, `gtwill-twinx`, and the TeX macros.

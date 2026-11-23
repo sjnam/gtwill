@@ -8,7 +8,7 @@
 *.toc
 *.mref
 *.smref
-# Go tangled from the webs by `make generate' (the .w and gtwill.ch are the sources)
+# Go tangled from the webs by `make generate' (the .gw and gtwill.ch are the sources)
 /cmd/gtwill/*.go
 /cmd/gtwill-refsort/*.go
 /cmd/gtwill-twinx/*.go

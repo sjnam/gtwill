@@ -1,27 +1,27 @@
-Changes to gweave.w that turn GWEAVE into GTWILL, GWEB's counterpart of CTWILL.
+Changes to gweave.gw that turn GWEAVE into GTWILL, GWEB's counterpart of CTWILL.
 
 GTWILL is to GWEAVE what Knuth's CTWILL is to CWEAVE: the same program, extended
 so that every pair of facing pages gets a ``mini-index'' of the identifiers used
 on it but defined elsewhere. Apply it the CWEB way:
 
-    gtangle gweave.w gtwill.ch    (the program)
-    gweave  gweave.w gtwill.ch    (its listing, the changed sections starred)
+    gtangle gweave.gw gtwill.ch    (the program)
+    gweave  gweave.gw gtwill.ch    (its listing, the changed sections starred)
 
-where gweave.w is cmd/gweave/gweave.w of the GWEB release pinned in go.mod.
+where gweave.gw is cmd/gweave/gweave.gw of the GWEB release pinned in go.mod.
 
 @x limbo
-\def\title{GWEAVE (Version 0.10.7)}
+\def\title{GWEAVE (Version 0.11.0)}
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GWEAVE} processor}
   \vskip 15pt
-  \centerline{(Version 0.10.7)}
+  \centerline{(Version 0.11.0)}
   \vfill}
 @y
-\def\title{GTWILL (Version 0.10.7)}
+\def\title{GTWILL (Version 0.11.0)}
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GTWILL} processor}
   \vskip 15pt
-  \centerline{(Version 0.10.7)}
+  \centerline{(Version 0.11.0)}
   \vfill}
 @z
 
@@ -29,14 +29,15 @@ where gweave.w is cmd/gweave/gweave.w of the GWEB release pinned in go.mod.
 @** Processor gweave.
 This is the command-line front end of \.{gweave}; the weave engine it drives is
 defined in the second half of this web. The input may be named with or without
-its \.{.w} extension (\.{gweave wc} reads \.{wc.w}, as in \.{CWEB}). The woven document
+its \.{.gw} extension, as \.{CWEB}'s may without \.{.w}: \.{gweave wc} reads
+\.{wc.gw}, or an old-style \.{wc.w} if that is all there is (see |WebFile|). The woven document
 is written to the input's base name with a \.{.tex} extension; process it with a
 \TEX/ engine that can find \.{gwebmac.tex} to produce a {\sc PDF}.
 @y
 @** Processor gtwill.
 This is \.{gtwill}, the \.{GWEB} counterpart of Knuth's \.{CTWILL}. It is
 \.{gweave} with a change file, \.{gtwill.ch}, just as \.{CTWILL} is
-\.{CWEAVE} with \.{ctwill.ch}; the listing you are reading is \.{gweave.w} with
+\.{CWEAVE} with \.{ctwill.ch}; the listing you are reading is \.{gweave.gw} with
 that change file applied, and the sections it altered or added carry a star.
 \.{CTWILL} descends in turn from \.{TWILL}, the private \.{WEB} program with
 which Knuth produced Volumes B and~D of {\sl Computers \char`\&\ Typesetting\/}
@@ -47,7 +48,8 @@ defined. Knuth tells the story in ``Mini-indexes for literate programs,''
 reprinted in {\sl Digital Typography\/} (1999), 225--245.
 
 The version number parallels that of the \.{gweave} it is built from. The
-input may be named with or without its \.{.w} extension, and the woven document
+input may be named with or without its \.{.gw} extension (\.{gtwill foo} reads
+\.{foo.gw}, or an old-style \.{foo.w} if that is all there is), and the woven document
 is written to the input's base name with a \.{.tex} extension, exactly as with
 \.{gweave}; process it with a \TEX/ engine that can find \.{gtwimac.tex} (which
 loads \.{gwebmac.tex}) to produce a {\sc PDF}.
@@ -81,7 +83,7 @@ func main() {
 @ Usage.
 @<Print a usage message@>=
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: gweave [-o dir] file[.w] [change[.ch]]")
+	fmt.Fprintln(os.Stderr, "usage: gweave [-o dir] file[.gw] [change[.ch]]")
 	flag.PrintDefaults()
 }
 @y
@@ -89,7 +91,7 @@ func usage() {
 \.{CTWILL} closely, because the two programs work the same way; I have kept his
 words where they still fit. \.{gtwill} is exactly like \.{gweave} except that it
 produces much better documentation, for which you must work harder. Input comes
-from a source file \.{foo.w} and from an optional (but now almost mandatory)
+from a source file \.{foo.gw} and from an optional (but now almost mandatory)
 change file \.{foo.ch}; output goes to \.{foo.tex}. Unlike \.{gweave}, there is an
 additional output file, \.{foo.aux}, which records all nonexternal definitions
 in a form that other webs can read.
@@ -111,7 +113,7 @@ identifiers used in that section and information about where they are defined.
 The macros in \.{gtwimac.tex} figure out which identifiers should go in each
 mini-index, based on how the pages break. (Yes, those macros are pretty hairy.)
 
-@ The information that \.{gtwill} concocts from \.{foo.w} is not always correct.
+@ The information that \.{gtwill} concocts from \.{foo.gw} is not always correct.
 Sometimes you'll use an identifier that you don't want indexed; for example, your
 exposition might talk about |f(x)| when you don't mean to refer to program
 variables |f| or |x|. Sometimes you'll use an identifier that's defined in
@@ -162,7 +164,7 @@ the form of this \.{@@\$} operator; therefore you can use a text editor to paste
 such entries into a \.{.ch} file, whenever you want to tell \.{gtwill} about
 definitions that are out of order or from other programs. The general convention
 is to put the definitions of library functions into \.{system.bux}, and to put
-the definitions found in the specifically foo-ish packages that \.{foo.w} imports
+the definitions found in the specifically foo-ish packages that \.{foo.gw} imports
 into \.{foo.bux}. Like the \.{.aux} files, \.{.bux} files should contain only
 \.{@@\$} specifications; this rule corresponds to the fact that `bux' is the
 plural of `\$'. The \.{.bux} files may also contain \.{@@i} includes. They are
@@ -286,18 +288,18 @@ func main() {
 @ Usage.
 @<Print a usage message@>=
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: gtwill [-P] [-o dir] file[.w] [change[.ch]]")
+	fmt.Fprintln(os.Stderr, "usage: gtwill [-P] [-o dir] file[.gw] [change[.ch]]")
 	flag.PrintDefaults()
 }
 @z
 
 @x run
-@ |run| supplies the default \.{.w} (and \.{.ch}) extension, parses the web
+@ |run| supplies the default \.{.gw} (and \.{.ch}) extension, parses the web
 (applying a change file if given), prints any warnings and a short progress
 report, and writes the woven \TEX/.
 @<Weave the web and write the \TEX/@>=
 func run(input, changeFile, outDir string) error {
-	input = common.DefaultExt(input, ".w")
+	input = common.WebFile(input)
 	changeFile = common.DefaultExt(changeFile, ".ch")
 	w, err := common.ParseWithChange(input, changeFile)
 	if err != nil {
@@ -327,7 +329,7 @@ func run(input, changeFile, outDir string) error {
 	return nil
 }
 @y
-@ |run| supplies the default \.{.w} (and \.{.ch}) extension, parses the web
+@ |run| supplies the default \.{.gw} (and \.{.ch}) extension, parses the web
 (applying a change file if given), prints any warnings and a short progress
 report, and writes the woven \TEX/ and the \.{.aux} file. Before weaving it tells
 the mini-index machinery whether we are in proofmode, the job's name (the
@@ -335,7 +337,7 @@ default title, and the stem of \.{foo.bux}), and where to look for the
 \.{.bux} files.
 @<Weave the web and write the \TEX/@>=
 func run(input, changeFile, outDir string, proof bool) error {
-	input = common.DefaultExt(input, ".w")
+	input = common.WebFile(input)
 	changeFile = common.DefaultExt(changeFile, ".ch")
 	w, err := common.ParseWithChange(input, changeFile)
 	if err != nil {
@@ -1761,7 +1763,7 @@ func TestWeaveSectionClosesConditional(t *testing.T) {
 
 @x the macro package is gtwimac
 func TestWeaveInjectsGwebmac(t *testing.T) {
-	// gweave supplies \.{\\input} gwebmac; the .w file need not.
+	// gweave supplies \.{\\input} gwebmac; the .gw file need not.
 	out := weaveString(t, "@@ x\n@@c\npackage main\n")
 	if !strings.HasPrefix(out, "\\input gwebmac\n") {
 		t.Errorf("woven output should start with \\input gwebmac, got:\n%.30q", out)
@@ -1774,7 +1776,7 @@ func TestWeaveInjectsGwebmac(t *testing.T) {
 }
 @y
 func TestWeaveInjectsGwebmac(t *testing.T) {
-	// gtwill supplies \.{\\input} gtwimac, which loads gwebmac; the .w file need not.
+	// gtwill supplies \.{\\input} gtwimac, which loads gwebmac; the .gw file need not.
 	out := weaveString(t, "@@ x\n@@c\npackage main\n")
 	if !strings.HasPrefix(out, "\\input gtwimac\n") {
 		t.Errorf("woven output should start with \\input gtwimac, got:\n%.30q", out)
@@ -1789,11 +1791,11 @@ func TestWeaveInjectsGwebmac(t *testing.T) {
 
 @x the tests of the mini-indexes go before the index
 @** Index.
-This index covers \.{GWEAVE} alone, as it stands when \.{gweave.w} is woven by
+This index covers \.{GWEAVE} alone, as it stands when \.{gweave.gw} is woven by
 itself: every identifier it uses (a section number is underlined where the
 identifier is defined), together with the manual index entries. In the combined
 \.{GWEB} document \.{gweb.ch} removes this section, and the index at the end of
-\.{gweb.w} covers all three webs. The list of section names follows.
+\.{gweb.gw} covers all three webs. The list of section names follows.
 @y
 @ The tests of the mini-index machinery need a web woven by a |Weaver| that we
 can look into afterwards, and the lists that its sections hand to \TEX/: the
@@ -2125,7 +2127,7 @@ func TestTwillProofmode(t *testing.T) {
 }
 
 @** Index.
-This index covers \.{GTWILL}, that is \.{gweave.w} together with the changes in
+This index covers \.{GTWILL}, that is \.{gweave.gw} together with the changes in
 \.{gtwill.ch}: every identifier it uses (a section number is underlined where the
 identifier is defined), together with the manual index entries. The list of
 section names follows.

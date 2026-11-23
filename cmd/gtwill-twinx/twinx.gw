@@ -1,9 +1,9 @@
-% twinx.w -- a master index for a set of programs woven by gtwill
+% twinx.gw -- a master index for a set of programs woven by gtwill
 \def\title{GTWILL-TWINX}
 \def\topofcontents{\null\vfill
   \centerline{\titlefont The {\ttitlefont GTWILL-TWINX} program}
   \vskip 15pt
-  \centerline{(GTWILL Version 0.10.7)}
+  \centerline{(GTWILL Version 0.11.0)}
   \vfill}
 \def\botofcontents{\vfill\centerline{\smallfont
   Soojin Nam, 2026. Released into the public domain.}}
